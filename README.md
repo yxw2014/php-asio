@@ -2,7 +2,7 @@
 
 ## 1. About
 
-This extension is a wrapper for the Boost.Asio library, hence the name php-asio.
+This extension is a PHP wrapper for the Boost.Asio library, hence the name php-asio.
 
 Now php-asio is **in development**, currently supported functionalities can be found [here](examples/stub.php).
 

@@ -17,7 +17,7 @@ class Asio {
      * @param bool $persistent
      * @return int : timer_id
      */
-    function addTimer(int $interval, callable $callback, $argument = null, $persistent = true) {}
+    function addTimer(int $interval, callable $callback, $argument = null, bool $persistent = true) {}
 
     /**
      * Delete timer.
