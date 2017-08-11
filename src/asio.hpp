@@ -7,61 +7,61 @@
  */
 class Asio : public Php::Base
 {
-	/**
-	 * The io_service of all IO objects in current instance
-	 */
-	IoService _io_service;
+    /**
+     * The io_service of all IO objects in current instance
+     */
+    IoService _io_service;
 
 public:
-	
-	/**
-	 * Add a new timer.
-	 * @throws Php::Exception : thrown when timer callback is not callable.
-	 */
-	Php::Value addTimer(Php::Parameters &);
 
-	/**
-	 * Cancel a timer and destroy all resource it allocates.
-	 */
-	void delTimer(Php::Parameters &) const;
+    /**
+     * Add a new timer.
+     * @throws Php::Exception : thrown when timer callback is not callable.
+     */
+    Php::Value addTimer(Php::Parameters &);
 
-	/**
-	 * Start event-loop in block mode.
-	 */
-	Php::Value run();
+    /**
+     * Cancel a timer and destroy all resource it allocates.
+     */
+    void delTimer(Php::Parameters &) const;
 
-	/**
-	 * Excecute at most one handler within the event loop in block mode.
-	 */
-	Php::Value runOne();
+    /**
+     * Start event-loop in block mode.
+     */
+    Php::Value run();
 
-	/**
-	* Start event-loop in non-block mode.
-	*/
-	Php::Value poll();
+    /**
+     * Excecute at most one handler within the event loop in block mode.
+     */
+    Php::Value runOne();
 
-	/**
-	* Excecute at most one handler within the event loop in non-block mode.
-	*/
-	Php::Value pollOne();
+    /**
+    * Start event-loop in non-block mode.
+    */
+    Php::Value poll();
 
-	/**
-	 * Cancel all pending handlers within the event loop.
-	 */
-	void stop();
+    /**
+    * Excecute at most one handler within the event loop in non-block mode.
+    */
+    Php::Value pollOne();
 
-	/**
-	 * Reset the io_service before start it again.
-	 */
-	void reset();
+    /**
+     * Cancel all pending handlers within the event loop.
+     */
+    void stop();
 
-	/**
-	 * Check whether the event loop has stopped.
-	 */
-	Php::Value stopped();
+    /**
+     * Reset the io_service before start it again.
+     */
+    void reset();
 
-	/**
-	 * Execute a given callback with argument at the next tick.
-	 */
-	void post(Php::Parameters &);
+    /**
+     * Check whether the event loop has stopped.
+     */
+    Php::Value stopped();
+
+    /**
+     * Execute a given callback with argument at the next tick.
+     */
+    void post(Php::Parameters &);
 };
