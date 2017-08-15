@@ -1,16 +1,5 @@
 #include "includes.hpp"
 
-int64_t Timer::_newId()
-{
-    while (auto id = Counter::current++)
-    {
-        auto iterator = _timer_map.find(id);
-        if (iterator == _timer_map.end())
-            return id;
-    }
-    return 0;
-}
-
 void Timer::_defer()
 {
     _timer->expires_from_now(boost::posix_time::milliseconds(_interval));
@@ -19,7 +8,7 @@ void Timer::_defer()
 
 void Timer::_handler()
 {
-    _callback(_argument);
+    _callback(_id, _argument);
     if (_persistent)
         _defer();
     else
@@ -27,12 +16,12 @@ void Timer::_handler()
 }
 
 Timer::Timer(
-    IoService &io_service,
+    IoService& io_service,
     int64_t interval,
-    Php::Value argument,
-    Php::Value callback,
+    const Php::Value& argument,
+    const Php::Value& callback,
     bool persistent
-) : _interval(interval), _argument(argument), _callback(callback), _persistent(persistent), _id(_newId())
+) : _interval(interval), _argument(argument), _callback(callback), _persistent(persistent), _id(Counter::increment(Counter::object_type::timer))
 {
     _timer = new boost::asio::deadline_timer(io_service());
     auto service_id = io_service.getId();
@@ -53,6 +42,7 @@ Timer::~Timer()
 {
     _timer->cancel();
     delete _timer;
+    Counter::erase(Counter::object_type::timer, _id);
 }
 
 int64_t Timer::getId() const
@@ -73,9 +63,21 @@ void Timer::del(int64_t service_id, int64_t timer_id)
 void Timer::delAll(int64_t service_id)
 {
     auto iterator = _timer_map.find(service_id);
-    for (auto &timer : iterator->second)
+    for (auto& timer : iterator->second)
+    {
         delete timer.second;
+        Counter::erase(Counter::object_type::timer, timer.first);
+    }
     _timer_map.erase(iterator);
+}
+
+void Timer::cancel(int64_t service_id, int64_t timer_id)
+{
+    auto map = _timer_map[service_id];
+    auto iterator = map.find(timer_id);
+    if (iterator == map.end())
+        throw Php::Exception("Timer does not exist.");
+    iterator->second->_persistent = false;
 }
 
 std::map<int64_t, std::map<int64_t, Timer *>> Timer::_timer_map;

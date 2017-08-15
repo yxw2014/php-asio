@@ -2,7 +2,6 @@
 
 /**
  * PHP-CPP Wrapper for Boost.Asio
- * This is the only class which is exposed to PHP.
  * See export.php for details of function parameters.
  */
 class Asio : public Php::Base
@@ -18,12 +17,12 @@ public:
      * Add a new timer.
      * @throws Php::Exception : thrown when timer callback is not callable.
      */
-    Php::Value addTimer(Php::Parameters &);
+    Php::Value addTimer(Php::Parameters&);
 
     /**
      * Cancel a timer and destroy all resource it allocates.
      */
-    void delTimer(Php::Parameters &) const;
+    void delTimer(Php::Parameters&) const;
 
     /**
      * Start event-loop in block mode.
@@ -63,5 +62,5 @@ public:
     /**
      * Execute a given callback with argument at the next tick.
      */
-    void post(Php::Parameters &);
+    void post(Php::Parameters&);
 };

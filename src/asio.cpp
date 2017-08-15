@@ -1,28 +1,28 @@
 #include "includes.hpp"
 
-Php::Value Asio::addTimer(Php::Parameters &params)
+Php::Value Asio::addTimer(Php::Parameters& params)
 {
+    auto callback = params[1];
+    if (!callback.isCallable())
+        throw Php::Exception("Timer callback not callable.");
+    bool persistent;
     auto param_count = params.size();
     if (param_count < 4)
     {
         if (param_count == 2)
             params.push_back(Php::Value());
-        params.push_back(true);
+        persistent = true;
     }
-    auto interval = params[0].numericValue();
-    auto callback = params[1];
-    if (!callback.isCallable())
-        throw Php::Exception("Timer callback not callable.");
-    auto argument = params[2];
-    auto persistent = params[3].boolValue();
-    auto timer = new Timer(_io_service, interval, argument, callback, persistent);
+    else
+        persistent = params[3].boolValue();
+    auto timer = new Timer(_io_service, params[0].numericValue(), params[2], callback, persistent);
     return timer->getId();
 }
 
-void Asio::delTimer(Php::Parameters &params) const
+void Asio::delTimer(Php::Parameters& params) const
 {
     auto timer_id = params[0].numericValue();
-    Timer::del(_io_service.getId(), timer_id);
+    Timer::cancel(_io_service.getId(), timer_id);
 }
 
 Php::Value Asio::run()
@@ -60,7 +60,7 @@ Php::Value Asio::stopped()
     return _io_service().stopped();
 }
 
-void Asio::post(Php::Parameters &params)
+void Asio::post(Php::Parameters& params)
 {
     if (params.size() < 2)
         params.push_back(Php::Value());

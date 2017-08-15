@@ -20,9 +20,14 @@ public:
     IoService();
 
     /**
+     * Destructor.
+     */
+    ~IoService();
+
+    /**
      * Get refernce of io_service.
      */
-    boost::asio::io_service &operator()();
+    boost::asio::io_service& operator()();
 
     /**
      * Get id of io_service.

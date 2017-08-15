@@ -1,5 +1,8 @@
 #pragma once
 
+/**
+ * Wrapper for Boost.Asio deadline timer.
+ */
 class Timer
 {
     /**
@@ -33,7 +36,7 @@ class Timer
     bool _persistent;
 
     /**
-     * Id of this timer.
+     * ID of this timer.
      */
     int64_t _id;
 
@@ -41,12 +44,6 @@ class Timer
      * Service Id of this timer.
      */
     int64_t _service_id;
-
-    /**
-     * Advance the counter and get a new Id.
-     * @return timer_id
-     */
-    static int64_t _newId();
 
     /**
      * Defer the timer.
@@ -57,6 +54,13 @@ class Timer
      * Handler for timer callback.
      */
     void _handler();
+
+    /**
+     * Delete timer.
+     * @param service_id : ID of io service which the timer is based on
+     * @param timer_id
+     */
+    static void del(int64_t service_id, int64_t timer_id);
 
 public:
 
@@ -69,10 +73,10 @@ public:
      * @param persistent : Whether timer repeats
      */
     explicit Timer(
-        IoService &io_service,
+        IoService& io_service,
         int64_t interval,
-        Php::Value argument,
-        Php::Value callback,
+        const Php::Value& argument,
+        const Php::Value& callback,
         bool persistent);
 
     /**
@@ -87,15 +91,15 @@ public:
     int64_t getId() const;
 
     /**
-     * Delete timer.
-     * @param service_id : Id of io service which the timer is based on
-     * @param timer_id
-     */
-    static void del(int64_t service_id, int64_t timer_id);
-
-    /**
      * Delete all timers based on the given io_service.
      * @param service_id
      */
     static void delAll(int64_t service_id);
+
+    /**
+     * Set a timer's persistant attribute to false.
+     * @param service_id : ID of io service which the timer is based on
+     * @param timer_id
+     */
+    static void cancel(int64_t service_id, int64_t timer_id);
 };

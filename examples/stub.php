@@ -58,7 +58,7 @@ class Asio {
      * Execute the given callback the next tick.
      *
      * @param callable $callback
-     * @param null $argument
+     * @param mixed $argument
      * @return int : the number of handlers executed
      */
     function post(callable $callback, $argument = null) {}
