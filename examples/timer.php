@@ -1,4 +1,9 @@
 <?php
+/**
+ * Example for php-asio timer.
+ *
+ * @author CismonX<admin@cismon.net>
+ */
 
 $service = new Asio\Service();
 $timer = $service->addTimer(1000, function (Asio\Timer $timer, $arg, $ec) use ($service) {

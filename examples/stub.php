@@ -133,6 +133,11 @@ class TcpServer {
     function stop() {}
 }
 
+/**
+ * Wrapper for Boost.Asio TCP socket.
+ *
+ * @package Asio
+ */
 class TcpConnection {
 
     /**
