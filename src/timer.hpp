@@ -3,17 +3,17 @@
 /**
  * Wrapper for Boost.Asio deadline timer.
  */
-class Timer
+class Timer : public Php::Base
 {
+    /**
+     * IO service for current timer.
+     */
+    boost::asio::io_service& _io_service;
+
     /**
      * Boost.Asio timer instance.
      */
-    boost::asio::deadline_timer *_timer;
-
-    /**
-     * Map for all timer instances.
-     */
-    static std::map<int64_t, std::map<int64_t, Timer *>> _timer_map;
+    boost::asio::deadline_timer _timer;
 
     /**
      * Timer interval(milliseconds).
@@ -36,14 +36,14 @@ class Timer
     bool _persistent;
 
     /**
-     * ID of this timer.
+     * Boolean flag for execution context.
      */
-    int64_t _id;
+    bool _context_flag = false;
 
     /**
-     * Service Id of this timer.
+     * PHP wrapper for this object.
      */
-    int64_t _service_id;
+    Php::Object* _wrapper;
 
     /**
      * Defer the timer.
@@ -52,54 +52,54 @@ class Timer
 
     /**
      * Handler for timer callback.
+     * @param error : error code
      */
-    void _handler();
-
-    /**
-     * Delete timer.
-     * @param service_id : ID of io service which the timer is based on
-     * @param timer_id
-     */
-    static void del(int64_t service_id, int64_t timer_id);
+    void _handler(const boost::system::error_code& error);
 
 public:
 
     /**
      * Timer constructor.
-     * @param io_service : Wrapper for boost::asio::io_service
+     * @param io_service : IO service for current timer
      * @param interval : Timer interval
      * @param argument : Argument to be passed to timer callback
      * @param callback : Timer callback
      * @param persistent : Whether timer repeats
      */
     explicit Timer(
-        IoService& io_service,
+        boost::asio::io_service& io_service,
         int64_t interval,
         const Php::Value& argument,
         const Php::Value& callback,
         bool persistent);
 
     /**
+     * Deleted default constructor.
+     */
+    Timer() = delete;
+
+    /**
+     * Deleted copy constructor.
+     */
+    Timer(const Timer&) = delete;
+
+    /**
+     * Deleted copy assignment operator.
+     */
+    Timer& operator=(const Timer &) = delete;
+
+    /**
      * Timer destructor.
      */
-    ~Timer();
+    virtual ~Timer();
 
     /**
-     * Get timer id.
-     * @return timer_id
+     * Set next expire time for timer.
      */
-    int64_t getId() const;
+    void defer(Php::Parameters& params);
 
     /**
-     * Delete all timers based on the given io_service.
-     * @param service_id
+     * Set timer's persistant attribute to false.
      */
-    static void delAll(int64_t service_id);
-
-    /**
-     * Set a timer's persistant attribute to false.
-     * @param service_id : ID of io service which the timer is based on
-     * @param timer_id
-     */
-    static void cancel(int64_t service_id, int64_t timer_id);
+    void cancel();
 };

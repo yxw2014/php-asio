@@ -1,13 +1,13 @@
 <?php
 
-$io_service = new Asio;
-$io_service->addTimer(1000, function ($timer_id, $arg) use ($io_service) {
+$service = new Asio\Service();
+$timer = $service->addTimer(1000, function (Asio\Timer $timer, $arg, $ec) use ($service) {
     static $counter = 0;
-    $io_service->post(function () {
+    $service->post(function () {
         echo 'Wait for one second...', PHP_EOL;
     });
     echo $arg, PHP_EOL;
     if (++$counter >= 5)
-        $io_service->delTimer($timer_id);
+        $timer->cancel();
 }, 'Tick.');
-$io_service->run();
+$service->run();

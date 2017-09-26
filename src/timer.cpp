@@ -2,82 +2,75 @@
 
 void Timer::_defer()
 {
-    _timer->expires_from_now(boost::posix_time::milliseconds(_interval));
-    _timer->async_wait(boost::bind(&Timer::_handler, this));
+    _timer.expires_from_now(boost::posix_time::milliseconds(_interval));
+    _timer.async_wait(boost::bind(&Timer::_handler, this, boost::asio::placeholders::error));
 }
 
-void Timer::_handler()
+void Timer::_handler(const boost::system::error_code& error)
 {
-    _callback(_id, _argument);
-    if (_persistent)
+    if (_context_flag)
+        goto End;
+    _context_flag = true;
+    _callback(this, _argument, error.value());
+    if (_persistent || !_context_flag)
+    {
+        _context_flag = false;
         _defer();
-    else
-        del(_service_id, _id);
+    }
+    // Delete this Php::Object when timer stops.
+    // Refcount will fall to zero and timer will be destroyed.
+    else End:
+    {
+        _context_flag = false;
+        delete _wrapper;
+        _wrapper = nullptr;
+    }
 }
 
 Timer::Timer(
-    IoService& io_service,
+    boost::asio::io_service& io_service,
     int64_t interval,
     const Php::Value& argument,
     const Php::Value& callback,
     bool persistent
-) : _interval(interval), _argument(argument), _callback(callback), _persistent(persistent), _id(Counter::increment(Counter::object_type::timer))
+) : _io_service(io_service), _timer(io_service), _interval(interval), _argument(argument), _callback(callback), _persistent(persistent)
 {
-    _timer = new boost::asio::deadline_timer(io_service());
-    auto service_id = io_service.getId();
-    auto iterator = _timer_map.find(service_id);
-    if (iterator == _timer_map.end())
-    {
-        std::map<int64_t, Timer *> new_map;
-        new_map.insert(std::make_pair(_id, this));
-        _timer_map.insert(make_pair(service_id, new_map));
-    }
-    else
-        iterator->second.insert(std::make_pair(_id, this));
-    _service_id = io_service.getId();
+    // Objects instantiated in C++ must be wrapped within a Php::Object to make it accessible by Zend Engine.
+    // Store this Php::Object in class property to make sure it stays alive until timer stopped.
+    // Otherwise the refcount of wrapped object will fall to zero and object will be destroyed by Zend Engine.
+    // The C++ object will also be destroyed by PHP-CPP, which will cause segmentation fault.
+    _wrapper = new Php::Object("Asio\\Timer", this);
     _defer();
 }
 
 Timer::~Timer()
 {
-    _timer->cancel();
-    delete _timer;
-    Counter::erase(Counter::object_type::timer, _id);
+    _timer.cancel();
+    if (_wrapper != nullptr)
+        delete _wrapper;
 }
 
-int64_t Timer::getId() const
+void Timer::defer(Php::Parameters& params)
 {
-    return _id;
-}
-
-void Timer::del(int64_t service_id, int64_t timer_id)
-{
-    auto map = _timer_map[service_id];
-    auto iterator = map.find(timer_id);
-    if (iterator == map.end())
-        throw Php::Exception("Timer does not exist.");
-    delete iterator->second;
-    map.erase(iterator);
-}
-
-void Timer::delAll(int64_t service_id)
-{
-    auto iterator = _timer_map.find(service_id);
-    for (auto& timer : iterator->second)
+    if (!_context_flag)
+        throw Php::Exception("Manual defer is not allowed outside handler callback.");
+    _context_flag = false;
+    auto param_count = params.size();
+    if (param_count)
     {
-        delete timer.second;
-        Counter::erase(Counter::object_type::timer, timer.first);
+        _interval = params[0];
+        if (param_count > 1)
+        {
+            _callback = params[1];
+            _argument = param_count == 2 ? Php::Value() : params[2];
+        }
     }
-    _timer_map.erase(iterator);
 }
 
-void Timer::cancel(int64_t service_id, int64_t timer_id)
+void Timer::cancel()
 {
-    auto map = _timer_map[service_id];
-    auto iterator = map.find(timer_id);
-    if (iterator == map.end())
-        throw Php::Exception("Timer does not exist.");
-    iterator->second->_persistent = false;
+    if (_context_flag)
+        _persistent = false;
+    else
+        _context_flag = true;
 }
-
-std::map<int64_t, std::map<int64_t, Timer *>> Timer::_timer_map;

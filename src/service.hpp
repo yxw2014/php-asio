@@ -1,17 +1,37 @@
 #pragma once
 
 /**
- * PHP-CPP Wrapper for Boost.Asio
- * See export.php for details of function parameters.
+ * Wrapper for Boost.Asio IO service.
+ * Provide access to instantiation of IO objects.
  */
-class Asio : public Php::Base
+class Service : public Php::Base
 {
     /**
      * The io_service of all IO objects in current instance
      */
-    IoService _io_service;
+    boost::asio::io_service _io_service;
 
 public:
+
+    /**
+     * Default constructor.
+     */
+    Service() = default;
+
+    /**
+     * Deleted copy constructor.
+     */
+    Service(const Service&) = delete;
+
+    /**
+     * Default destructor.
+     */
+    virtual ~Service() = default;
+
+    /**
+     * Deleted copy assignment operator.
+     */
+    Service& operator=(const Service&) = delete;
 
     /**
      * Add a new timer.
@@ -20,9 +40,9 @@ public:
     Php::Value addTimer(Php::Parameters&);
 
     /**
-     * Cancel a timer and destroy all resource it allocates.
+     * Create a new TCP server and start listening.
      */
-    void delTimer(Php::Parameters&) const;
+    Php::Value addTcpServer(Php::Parameters&);
 
     /**
      * Start event-loop in block mode.
@@ -35,7 +55,7 @@ public:
     Php::Value runOne();
 
     /**
-    * Start event-loop in non-block mode.
+    * Start event loop in non-block mode.
     */
     Php::Value poll();
 
@@ -57,7 +77,7 @@ public:
     /**
      * Check whether the event loop has stopped.
      */
-    Php::Value stopped();
+    Php::Value stopped() const;
 
     /**
      * Execute a given callback with argument at the next tick.
