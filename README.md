@@ -27,4 +27,4 @@ Bug reports and pull requests are welcome.
 
 Currently, the only documentation is the comments in the sources files. ~~Good luck with that.~~
 
-There are also some examples in the [/examples](/examples) directory.
+There are also some examples in the [examples/](examples/) directory.
