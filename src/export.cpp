@@ -1,5 +1,7 @@
 #include "includes.hpp"
 
+using namespace Asio;
+
 extern "C" PHPCPP_EXPORT void* get_module()
 {
     static Php::Extension asio("asio", "1.0");
@@ -56,17 +58,17 @@ extern "C" PHPCPP_EXPORT void* get_module()
     });
     tcp_server.method<&TcpServer::stop>("stop");
 
-    //Class Asio\TcpConnection.
-    Php::Class<TcpConnection> tcp_connection("Asio\\TcpConnection", Php::Final);
+    //Class Asio\TcpSocket.
+    Php::Class<TcpSocket> tcp_connection("Asio\\TcpSocket", Php::Final);
 
     //Methods for reading and writing.
-    tcp_connection.method<&TcpConnection::read>("read", {
+    tcp_connection.method<&TcpSocket::read>("read", {
         Php::ByVal("length", Php::Type::Numeric),
         Php::ByVal("read_some", Php::Type::Bool),
         Php::ByVal("callback", Php::Type::Callable),
         Php::ByVal("argument", Php::Type::Null, false),
     });
-    tcp_connection.method<&TcpConnection::write>("write", {
+    tcp_connection.method<&TcpSocket::write>("write", {
         Php::ByVal("data", Php::Type::String),
         Php::ByVal("write_some", Php::Type::Bool),
         Php::ByVal("callback", Php::Type::Callable, false),
@@ -74,9 +76,9 @@ extern "C" PHPCPP_EXPORT void* get_module()
     });
 
     //Other Methods.
-    tcp_connection.method<&TcpConnection::available>("available");
-    tcp_connection.method<&TcpConnection::atMark>("atMark");
-    tcp_connection.method<&TcpConnection::close>("close");
+    tcp_connection.method<&TcpSocket::available>("available");
+    tcp_connection.method<&TcpSocket::atMark>("atMark");
+    tcp_connection.method<&TcpSocket::close>("close");
 
     asio.add(std::move(service));
     asio.add(std::move(timer));

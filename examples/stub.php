@@ -138,7 +138,7 @@ class TcpServer {
  *
  * @package Asio
  */
-class TcpConnection {
+class TcpSocket {
 
     /**
      * This class can only be instantiated by TcpServer and TcpClient.
@@ -146,7 +146,7 @@ class TcpConnection {
     private function __construct() {}
 
     /**
-     * Asynchronously read from the stream socket of this connection.
+     * Asynchronously read from the stream socket.
      *
      * @param int $length : Max number of bytes to be read
      * @param bool $read_some
@@ -156,7 +156,7 @@ class TcpConnection {
     function read(int $length, bool $read_some, callable $callback, $argument = null) {}
 
     /**
-     * Asynchronously write to the stream socket of this connection.
+     * Asynchronously write to the stream socket.
      *
      * @param string $data : Write buffer
      * @param bool $write_some
@@ -180,7 +180,7 @@ class TcpConnection {
     function atMark() {}
 
     /**
-     * Close TCP connection.
+     * Close TCP socket.
      */
     function close() {}
 }
