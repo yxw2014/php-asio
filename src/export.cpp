@@ -22,6 +22,10 @@ extern "C" PHPCPP_EXPORT void* get_module()
         Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false),
     });
+    service.method<&Service::addSignal>("addSignal", {
+        Php::ByVal("callback", Php::Type::Callable),
+        Php::ByVal("argument", Php::Type::Null, false),
+    });
 
     //Methods for execution control.
     service.method<&Service::run>("run");
@@ -80,9 +84,20 @@ extern "C" PHPCPP_EXPORT void* get_module()
     tcp_connection.method<&TcpSocket::atMark>("atMark");
     tcp_connection.method<&TcpSocket::close>("close");
 
+    //Class Asio\Signal.
+    Php::Class<Signal> signal("Asio\\Signal", Php::Final);
+
+    //Methods for signal handler.
+    signal.method<&Signal::add>("add");
+    signal.method<&Signal::remove>("remove");
+    signal.method<&Signal::clear>("clear");
+    signal.method<&Signal::cancel>("cancel");
+    
+
     asio.add(std::move(service));
     asio.add(std::move(timer));
     asio.add(std::move(tcp_server));
     asio.add(std::move(tcp_connection));
+    asio.add(std::move(signal));
     return asio;
 }

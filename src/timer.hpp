@@ -5,12 +5,8 @@ namespace Asio
     /**
      * Wrapper for Boost.Asio deadline timer.
      */
-    class Timer : public Php::Base
+    class Timer : public Base
     {
-        /**
-         * IO service for current timer.
-         */
-        boost::asio::io_service& _io_service;
 
         /**
          * Boost.Asio timer instance.
@@ -43,11 +39,6 @@ namespace Asio
         bool _context_flag = false;
 
         /**
-         * PHP wrapper for this object.
-         */
-        Php::Object* _wrapper;
-
-        /**
          * Defer the timer.
          */
         void _defer();
@@ -74,21 +65,6 @@ namespace Asio
             const Php::Value& argument,
             const Php::Value& callback,
             bool persistent);
-
-        /**
-         * Deleted default constructor.
-         */
-        Timer() = delete;
-
-        /**
-         * Deleted copy constructor.
-         */
-        Timer(const Timer&) = delete;
-
-        /**
-         * Deleted copy assignment operator.
-         */
-        Timer& operator=(const Timer &) = delete;
 
         /**
          * Timer destructor.

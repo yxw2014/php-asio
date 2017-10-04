@@ -23,6 +23,15 @@ namespace Asio
             param_count == 2 ? Php::Value() : params[2]);
     }
 
+    Php::Value Service::addSignal(Php::Parameters& params)
+    {
+        auto param_count = params.size();
+        auto signal = new Signal(_io_service, param_count == 1 ? Php::Value() : params[1], params[0]);
+        if (param_count > 2)
+            signal->add(std::vector<Php::Value>(params.begin() + 2, params.end()));
+        return signal;
+    }
+
     Php::Value Service::run()
     {
         return boost::numeric_cast<int64_t>(_io_service.run());

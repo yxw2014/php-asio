@@ -10,10 +10,10 @@ namespace Asio
 
     void Timer::_handler(const boost::system::error_code& error)
     {
-        if (_context_flag)
+        if (error.value() == 125)
             goto End;
         _context_flag = true;
-        _callback(this, _argument, error.value());
+        _callback(this, _argument, boost::numeric_cast<int64_t>(error.value()));
         if (_persistent || !_context_flag)
         {
             _context_flag = false;
@@ -35,7 +35,7 @@ namespace Asio
         const Php::Value& argument,
         const Php::Value& callback,
         bool persistent
-    ) : _io_service(io_service), _timer(io_service), _interval(interval), _argument(argument), _callback(callback), _persistent(persistent)
+    ) : Base(io_service), _timer(io_service), _interval(interval), _argument(argument), _callback(callback), _persistent(persistent)
     {
         // Objects instantiated in C++ must be wrapped within a Php::Object to make it accessible by Zend Engine.
         // Store this Php::Object in class property to make sure it stays alive until timer stopped.
@@ -47,9 +47,7 @@ namespace Asio
 
     Timer::~Timer()
     {
-        _timer.cancel();
-        if (_wrapper != nullptr)
-            delete _wrapper;
+
     }
 
     void Timer::defer(Php::Parameters& params)
@@ -74,7 +72,7 @@ namespace Asio
         if (_context_flag)
             _persistent = false;
         else
-            _context_flag = true;
+            _timer.cancel();
     }
 
 }

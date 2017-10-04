@@ -33,7 +33,7 @@ namespace Asio
         bool auto_accept,
         const Php::Value& argument,
         const Php::Value& callback
-    ) : _io_service(io_service), _argument(argument), _callback(callback), _auto_accept(auto_accept)
+    ) : Base(io_service), _argument(argument), _callback(callback), _auto_accept(auto_accept)
     {
         try
         {
@@ -61,7 +61,6 @@ namespace Asio
 
     void TcpServer::accept(Php::Parameters& params)
     {
-
         if (_auto_accept)
             throw Php::Exception("Server is working in auto-accept mode.");
         auto param_count = params.size();

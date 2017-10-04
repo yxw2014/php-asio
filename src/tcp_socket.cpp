@@ -2,7 +2,7 @@
 
 namespace Asio
 {
-    TcpSocket::TcpSocket(boost::asio::io_service& io_service) : _socket(io_service)
+    TcpSocket::TcpSocket(boost::asio::io_service& io_service) : Base(io_service), _socket(io_service)
     {
         _wrapper = new Php::Object("Asio\\TcpSocket", this);
     }

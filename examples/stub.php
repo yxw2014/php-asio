@@ -28,13 +28,27 @@ class Service {
     function addTimer(int $interval, callable $callback, $argument = null, bool $persistent = true) {}
 
     /**
+     * Add TCP server.
+     *
      * @param string $address : Local IP address. IPv4(e.g. '0.0.0.0') and IPv6(e.g. '::') supported.
      * @param int $port : Local port to bind to.
      * @param callable $callback[optional] : Acceptor callback
      * @param mixed $argument
-     * @return TcpConnection
+     * @throws \Exception
+     * @return TcpSocket
      */
     function addTcpServer(string $address, int $port, callable $callback, $argument = null) {}
+
+    /**
+     * Add signal handler.
+     *
+     * @param callable $callback
+     * @param mixed $argument
+     * @param int[] ...$signals[optional]
+     * @throws \Exception
+     * @return Signal
+     */
+    function addSignal(callable $callback, $argument = null, int... $signals) {}
 
     /**
      * Run event loop(blocked).
@@ -80,7 +94,7 @@ class Service {
  *
  * @package Asio
  */
-class Timer {
+final class Timer {
 
     /**
      * This class can only be instantiated using "Service::addTimer()".
@@ -97,6 +111,7 @@ class Timer {
      * @param int $interval[optional]
      * @param callable $callback[optional]
      * @param mixed $argument
+     * @throws \Exception
      */
     function defer(int $interval, callable $callback, $argument = null) {}
 
@@ -112,7 +127,7 @@ class Timer {
  *
  * @package Asio
  */
-class TcpServer {
+final class TcpServer {
 
     /**
      * This class can only be instantiated using "Service::addTcpServer()".
@@ -124,6 +139,7 @@ class TcpServer {
      *
      * @param callable $callback : Acceptor callback
      * @param mixed $argument
+     * @throws \Exception
      */
     function accept(callable $callback, $argument = null) {}
 
@@ -138,7 +154,7 @@ class TcpServer {
  *
  * @package Asio
  */
-class TcpSocket {
+final class TcpSocket {
 
     /**
      * This class can only be instantiated by TcpServer and TcpClient.
@@ -152,6 +168,7 @@ class TcpSocket {
      * @param bool $read_some
      * @param callable $callback : Read handler callback
      * @param mixed $argument
+     * @throws \Exception
      */
     function read(int $length, bool $read_some, callable $callback, $argument = null) {}
 
@@ -161,7 +178,8 @@ class TcpSocket {
      * @param string $data : Write buffer
      * @param bool $write_some
      * @param callable $callback[optional] : Write handler callback
-     * @param null $argument
+     * @param mixed $argument
+     * @throws \Exception
      */
     function write(string $data, bool $write_some, callable $callback, $argument = null) {}
 
@@ -183,4 +201,46 @@ class TcpSocket {
      * Close TCP socket.
      */
     function close() {}
+}
+
+/**
+ * Wrapper for Boost.Asio signal_set.
+ * @package Asio
+ */
+final class Signal {
+
+    /**
+     * This class can only be instantiated using "Service::addSignal()".
+     */
+    private function __construct() {}
+
+    /**
+     * Add signals.
+     *
+     * @param int[] ...$signals[optional]
+     * @throws \Exception
+     */
+    function add(int... $signals) {}
+
+    /**
+     * Remove signals.
+     *
+     * @param int[] ...$signals[optional]
+     * @throws \Exception
+     */
+    function remove(int... $signals) {}
+
+    /**
+     * Remove all signals.
+     *
+     * @throws \Exception
+     */
+    function clear() {}
+
+    /**
+     * Cancel signal handler.
+     *
+     * @throws \Exception
+     */
+    function cancel() {}
 }

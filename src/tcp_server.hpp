@@ -6,12 +6,13 @@ namespace Asio
      * Wrapper for Boost.Asio TCP acceptor.
      * Provide TCP services.
      */
-    class TcpServer : public Php::Base
+    class TcpServer : public Base
     {
+
         /**
-         * IO service of this server.
+         * Acceptor for this server.
          */
-        boost::asio::io_service& _io_service;
+        tcp::acceptor* _acceptor;
 
         /**
          * Argument to be passed to acceptor callback.
@@ -34,19 +35,9 @@ namespace Asio
         bool _stopped = false;
 
         /**
-         * Acceptor for this server.
-         */
-        tcp::acceptor* _acceptor;
-
-        /**
          * Boolean flag for execution context.
          */
         bool _context_flag = false;
-
-        /**
-         * PHP wrapper for this object.
-         */
-        Php::Object* _wrapper;
 
         /**
          * Async accept.
@@ -77,21 +68,6 @@ namespace Asio
             bool auto_accept,
             const Php::Value& argument,
             const Php::Value& callback);
-
-        /**
-         * Deleted default constructor.
-         */
-        TcpServer() = delete;
-
-        /**
-         * Deleted copy constructor.
-         */
-        TcpServer(const TcpServer&) = delete;
-
-        /**
-         * Deleted copy assignment operator.
-         */
-        TcpServer& operator=(const TcpServer&) = delete;
 
         /**
          * Destructor.

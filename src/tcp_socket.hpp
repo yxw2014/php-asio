@@ -7,17 +7,12 @@ namespace Asio
     /**
      * Wrapper for Boost.Asio stream socket.
      */
-    class TcpSocket : public Php::Base
+    class TcpSocket : public Base
     {
         /**
          * Current TCP socket.
          */
         tcp::socket _socket;
-
-        /**
-         * PHP wrapper for this object.
-         */
-        Php::Object* _wrapper;
 
         /**
          * Whether socket is marked as closed.
@@ -79,21 +74,6 @@ namespace Asio
          * @param io_service : IO service of current TCP socket.
          */
         explicit TcpSocket(boost::asio::io_service& io_service);
-
-        /**
-         * Deleted default constructor.
-         */
-        TcpSocket() = delete;
-
-        /**
-         * Deleted copy constructor.
-         */
-        TcpSocket(const TcpSocket&) = delete;
-
-        /**
-         * Deleted copy assignment operator.
-         */
-        TcpSocket& operator=(const TcpSocket&) = delete;
 
         /**
          * Default destructor.

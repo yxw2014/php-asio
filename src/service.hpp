@@ -47,6 +47,11 @@ namespace Asio
         Php::Value addTcpServer(Php::Parameters&);
 
         /**
+         * Add new signal handler.
+         */
+        Php::Value addSignal(Php::Parameters&);
+
+        /**
          * Start event-loop in block mode.
          */
         Php::Value run();
