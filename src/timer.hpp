@@ -69,7 +69,7 @@ namespace Asio
         /**
          * Timer destructor.
          */
-        virtual ~Timer();
+        virtual ~Timer() = default;
 
         /**
          * Set next expire time for timer.

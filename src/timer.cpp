@@ -45,11 +45,6 @@ namespace Asio
         _defer();
     }
 
-    Timer::~Timer()
-    {
-
-    }
-
     void Timer::defer(Php::Parameters& params)
     {
         if (!_context_flag)
