@@ -17,16 +17,16 @@ CP                  =   cp -f
 SOURCES             =   $(wildcard src/*.cpp)
 OBJECTS             =   $(SOURCES:%.cpp=%.o)
 
-all:                    ${OBJECTS} ${EXTENSION}
+all: ${OBJECTS} ${EXTENSION}
 
-${EXTENSION}:           ${OBJECTS}
-                        ${LINKER} ${LINKER_FLAGS} -o $@ ${OBJECTS} ${LINKER_DEPENDENCIES}
+${EXTENSION}: ${OBJECTS}
+	${LINKER} ${LINKER_FLAGS} -o $@ ${OBJECTS} ${LINKER_DEPENDENCIES}
 
 ${OBJECTS}:
-                        ${COMPILER} ${COMPILER_FLAGS} $@ ${@:%.o=%.cpp}
+	${COMPILER} ${COMPILER_FLAGS} $@ ${@:%.o=%.cpp}
 
 install:
-                        ${CP} ${EXTENSION} ${EXTENSION_DIR}/${EXTENSION}
+	${CP} ${EXTENSION} ${EXTENSION_DIR}/${EXTENSION}
 
 clean:
-                        ${RM} ${EXTENSION} ${OBJECTS}
+	${RM} ${EXTENSION} ${OBJECTS}
