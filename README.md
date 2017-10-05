@@ -10,6 +10,8 @@ Bug reports and pull requests are welcome.
 
 ## 2. Build
 
+![](https://travis-ci.org/CismonX/php-asio.svg?branch=master)
+
 ### 2.1 Requirements
 
 * 64-bit PHP 7
