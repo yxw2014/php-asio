@@ -28,7 +28,7 @@ namespace Asio
         auto param_count = params.size();
         auto signal = new Signal(_io_service, param_count == 1 ? Php::Value() : params[1], params[0]);
         if (param_count > 2)
-            signal->add(std::vector<Php::Value>(params.begin() + 2, params.end()));
+            signal->add({ params.begin() + 2, params.end() });
         return signal;
     }
 

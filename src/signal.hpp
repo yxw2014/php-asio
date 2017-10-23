@@ -63,7 +63,7 @@ namespace Asio
         /**
          * Internal method for adding signals.
          */
-        void add(const std::vector<Php::Value>& signals);
+        void add(const std::vector<Php::Value>&& signals);
 
         /**
          * Remove signals.

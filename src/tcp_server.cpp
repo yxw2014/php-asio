@@ -9,7 +9,7 @@ namespace Asio
             boost::bind(&TcpServer::_handler, this, boost::asio::placeholders::error, connection));
     }
 
-    void TcpServer::_handler(const boost::system::error_code& error, TcpSocket* socket)
+    void TcpServer::_handler(const boost::system::error_code& error, const TcpSocket* socket)
     {
         //Stop outside accept handler callback.
         if (_stopped)

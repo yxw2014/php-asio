@@ -49,7 +49,7 @@ namespace Asio
          * @param error : Error code
          * @param socket : Client connection
          */
-        void _handler(const boost::system::error_code& error, TcpSocket* socket);
+        void _handler(const boost::system::error_code& error, const TcpSocket* socket);
 
     public:
 

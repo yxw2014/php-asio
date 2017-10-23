@@ -30,12 +30,12 @@ namespace Asio
 
     void Signal::add(Php::Parameters& params)
     {
-        add(std::vector<Php::Value>(params.begin(), params.end()));
+        add({ params.begin(), params.end() });
     }
 
-    void Signal::add(const std::vector<Php::Value>& signals)
+    void Signal::add(const std::vector<Php::Value>&& signals)
     {
-        for (auto param : signals)
+        for (const auto& param : signals)
         {
             if (!param.isNumeric())
                 throw Php::Exception("Integer value expected.");
