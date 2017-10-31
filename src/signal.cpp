@@ -1,12 +1,15 @@
-#include "includes.hpp"
+/**
+ * php-asio/signal.cpp
+ *
+ * @author CismonX<admin@cismon.net>
+ */
+
+#include "signal.hpp"
 
 namespace Asio
 {
     void Signal::_handler(const boost::system::error_code& error, int signal)
     {
-        //Errno 125: Operation cancelled.
-        if (error.value() == 125)
-            return;
         _callback(this, boost::numeric_cast<int64_t>(signal), _argument, boost::numeric_cast<int64_t>(error.value()));
         if (!_cancelled)
             _wait();

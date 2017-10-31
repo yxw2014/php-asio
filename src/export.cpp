@@ -1,4 +1,16 @@
-#include "includes.hpp"
+/**
+ * php-asio/export.cpp
+ *
+ * @author CismonX<admin@cismon.net>
+ */
+
+#include <phpcpp.h>
+
+#include "service.hpp"
+#include "timer.hpp"
+#include "tcp_server.hpp"
+#include "socket.hpp"
+#include "signal.hpp"
 
 using namespace Asio;
 
@@ -6,10 +18,31 @@ extern "C" PHPCPP_EXPORT void* get_module()
 {
     static Php::Extension asio("asio", "1.0");
 
+    //Interface Asio\Socket.
+    Php::Interface socket("Asio\\Socket");
+    socket.method("available");
+    socket.method("atMark");
+    socket.method("close");
+
+    //Interface Asio\StreamSocket.
+    Php::Interface stream_socket("Asio\\StreamSocket");
+    stream_socket.extends(socket);
+    stream_socket.method("read", {
+        Php::ByVal("length", Php::Type::Numeric),
+        Php::ByVal("read_some", Php::Type::Bool),
+        Php::ByVal("callback", Php::Type::Callable),
+        Php::ByVal("argument", Php::Type::Null, false),
+    });
+    stream_socket.method("write", {
+        Php::ByVal("data", Php::Type::String),
+        Php::ByVal("write_some", Php::Type::Bool),
+        Php::ByVal("callback", Php::Type::Callable, false),
+        Php::ByVal("argument", Php::Type::Null, false),
+    });
+
     //Class Asio\Service.
     Php::Class<Service> service("Asio\\Service");
 
-    //Methods for creating IO objects.
     service.method<&Service::addTimer>("addTimer", {
         Php::ByVal("interval", Php::Type::Numeric),
         Php::ByVal("callback", Php::Type::Callable),
@@ -26,8 +59,6 @@ extern "C" PHPCPP_EXPORT void* get_module()
         Php::ByVal("callback", Php::Type::Callable),
         Php::ByVal("argument", Php::Type::Null, false),
     });
-
-    //Methods for execution control.
     service.method<&Service::run>("run");
     service.method<&Service::runOne>("runOne");
     service.method<&Service::poll>("poll");
@@ -42,9 +73,6 @@ extern "C" PHPCPP_EXPORT void* get_module()
 
     //Class Asio\Timer.
     Php::Class<Timer> timer("Asio\\Timer", Php::Final);
-    //timer.method<&Timer::__construct>("__construct", Php::Private);
-
-    //Methods for timer.
     timer.method<&Timer::defer>("defer", {
         Php::ByVal("interval", Php::Type::Numeric, false),
         Php::ByVal("callback", Php::Type::Callable, false),
@@ -54,8 +82,6 @@ extern "C" PHPCPP_EXPORT void* get_module()
 
     //Class Asio\TcpServer.
     Php::Class<TcpServer> tcp_server("Asio\\TcpServer", Php::Final);
-
-    //Methods for TCP server.
     tcp_server.method<&TcpServer::accept>("accept", {
         Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false)
@@ -63,41 +89,35 @@ extern "C" PHPCPP_EXPORT void* get_module()
     tcp_server.method<&TcpServer::stop>("stop");
 
     //Class Asio\TcpSocket.
-    Php::Class<TcpSocket> tcp_connection("Asio\\TcpSocket", Php::Final);
-
-    //Methods for reading and writing.
-    tcp_connection.method<&TcpSocket::read>("read", {
+    Php::Class<TcpSocket> tcp_socket("Asio\\TcpSocket", Php::Final);
+    tcp_socket.implements(stream_socket);
+    tcp_socket.method<&TcpSocket::read>("read", {
         Php::ByVal("length", Php::Type::Numeric),
         Php::ByVal("read_some", Php::Type::Bool),
         Php::ByVal("callback", Php::Type::Callable),
         Php::ByVal("argument", Php::Type::Null, false),
     });
-    tcp_connection.method<&TcpSocket::write>("write", {
+    tcp_socket.method<&TcpSocket::write>("write", {
         Php::ByVal("data", Php::Type::String),
         Php::ByVal("write_some", Php::Type::Bool),
         Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false),
     });
-
-    //Other Methods.
-    tcp_connection.method<&TcpSocket::available>("available");
-    tcp_connection.method<&TcpSocket::atMark>("atMark");
-    tcp_connection.method<&TcpSocket::close>("close");
+    tcp_socket.method<&TcpSocket::available>("available");
+    tcp_socket.method<&TcpSocket::atMark>("atMark");
+    tcp_socket.method<&TcpSocket::close>("close");
 
     //Class Asio\Signal.
     Php::Class<Signal> signal("Asio\\Signal", Php::Final);
-
-    //Methods for signal handler.
     signal.method<&Signal::add>("add");
     signal.method<&Signal::remove>("remove");
     signal.method<&Signal::clear>("clear");
     signal.method<&Signal::cancel>("cancel");
-    
 
     asio.add(std::move(service));
     asio.add(std::move(timer));
     asio.add(std::move(tcp_server));
-    asio.add(std::move(tcp_connection));
+    asio.add(std::move(tcp_socket));
     asio.add(std::move(signal));
     return asio;
 }

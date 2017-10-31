@@ -1,4 +1,13 @@
-#include "includes.hpp"
+/**
+ * php-asio/service.cpp
+ *
+ * @author CismonX<admin@cismon.net>
+ */
+
+#include "service.hpp"
+#include "timer.hpp"
+#include "tcp_server.hpp"
+#include "signal.hpp"
 
 namespace Asio
 {

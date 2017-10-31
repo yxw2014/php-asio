@@ -1,4 +1,10 @@
-#include "includes.hpp"
+/**
+ * php-asio/timer.cpp
+ *
+ * @author CismonX<admin@cismon.net>
+ */
+
+#include "timer.hpp"
 
 namespace Asio
 {
@@ -10,10 +16,11 @@ namespace Asio
 
     void Timer::_handler(const boost::system::error_code& error)
     {
-        if (error.value() == 125)
-            goto End;
         _context_flag = true;
         _callback(this, _argument, boost::numeric_cast<int64_t>(error.value()));
+        //Errno 125: Operation cancelled.
+        if (error.value() == 125)
+            _persistent = false;
         if (_persistent || !_context_flag)
         {
             _context_flag = false;
@@ -21,7 +28,7 @@ namespace Asio
         }
         // Delete this Php::Object when timer stops.
         // Refcount will fall to zero and timer will be destroyed.
-        else End:
+        else
         {
             _context_flag = false;
             delete _wrapper;

@@ -1,4 +1,6 @@
-# Readme
+# php-asio
+
+[![](https://travis-ci.org/CismonX/php-asio.svg?branch=master)](https://travis-ci.org/CismonX/php-asio)
 
 ## 1. About
 
@@ -10,14 +12,12 @@ Bug reports and pull requests are welcome.
 
 ## 2. Build
 
-![](https://travis-ci.org/CismonX/php-asio.svg?branch=master)
-
 ### 2.1 Requirements
 
 * 64-bit PHP 7
 * [PHP-CPP](http://www.php-cpp.com/) \(GitHub master branch\)
 * The [Boost](http://www.boost.org/) C++ libraries
-* C++ compiler which supports C++11 (namely g++ 4.8.5 and above)
+* C++ compiler which supports C++11 \(namely g++ 4.8.5 and above\)
 
 ### 2.2 Notes
 

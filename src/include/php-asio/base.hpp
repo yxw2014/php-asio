@@ -1,4 +1,12 @@
+/**
+ * php-asio/include/php-asio/base.hpp
+ *
+ * @author CismonX<admin@cismon.net>
+ */
+
 #pragma once
+
+#include "common.hpp"
 
 namespace Asio
 {

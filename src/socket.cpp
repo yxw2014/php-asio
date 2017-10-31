@@ -1,34 +1,46 @@
-#include "includes.hpp"
+/**
+ * php-asio/socket.cpp
+ *
+ * @author CismonX<admin@cismon.net>
+ */
+
+#include "socket.hpp"
 
 namespace Asio
 {
-    TcpSocket::TcpSocket(boost::asio::io_service& io_service) : Base(io_service), _socket(io_service)
+    template <>
+    TcpSocket::Socket(boost::asio::io_service& io_service) : Base(io_service), _socket(io_service)
     {
         _wrapper = new Php::Object("Asio\\TcpSocket", this);
     }
 
-    TcpSocket::~TcpSocket()
+    template <typename protocol, typename socket_type>
+    Socket<protocol, socket_type>::~Socket()
     {
         close();
     }
 
-    tcp::socket& TcpSocket::getSocket()
+    template <typename protocol, typename socket_type>
+    socket_type& Socket<protocol, socket_type>::getSocket()
     {
         return _socket;
     }
 
-    void TcpSocket::_read_handler(
+    template <typename protocol, typename socket_type>
+    void Socket<protocol, socket_type>::_read_handler(
         const boost::system::error_code& error,
         size_t length,
         const Php::Value& callback,
         const Php::Value& argument,
         std::vector<uint8_t>* buffer)
     {
+        //Errno 125: Operation cancelled.
         callback(this, std::string(buffer->begin(), buffer->end()), boost::numeric_cast<int64_t>(length), error.value(), argument);
         delete buffer;
     }
 
-    void TcpSocket::_write_handler(
+    template <typename protocol, typename socket_type>
+    void Socket<protocol, socket_type>::_write_handler(
         const boost::system::error_code& error,
         size_t length,
         const Php::Value& callback,
@@ -40,7 +52,8 @@ namespace Asio
         delete buffer;
     }
 
-    void TcpSocket::read(Php::Parameters& params)
+    template <typename protocol, typename socket_type> template <class>
+    void Socket<protocol, socket_type>::read(Php::Parameters& params)
     {
         auto length = params[0].numericValue();
         if (length < 0)
@@ -48,24 +61,28 @@ namespace Asio
         _read(length, params[1].boolValue(), params[2], params.size() == 3 ? Php::Value() : params[3]);
     }
 
-    void TcpSocket::write(Php::Parameters& params)
+    template <typename protocol, typename socket_type> template <class>
+    void Socket<protocol, socket_type>::write(Php::Parameters& params)
     {
         auto param_count = params.size();
         _write(params[0].stringValue(), params[1].boolValue(), param_count < 3 ? Php::Value() : params[2],
             param_count < 4 ? Php::Value() : params[3]);
     }
 
-    Php::Value TcpSocket::available() const
+    template <typename protocol, typename socket_type>
+    Php::Value Socket<protocol, socket_type>::available() const
     {
         return boost::numeric_cast<int64_t>(_socket.available());
     }
 
-    Php::Value TcpSocket::atMark() const
+    template <typename protocol, typename socket_type>
+    Php::Value Socket<protocol, socket_type>::atMark() const
     {
         return _socket.at_mark();
     }
 
-    void TcpSocket::close()
+    template <typename protocol, typename socket_type>
+    void Socket<protocol, socket_type>::close()
     {
         if (!_closed)
         {
@@ -79,7 +96,8 @@ namespace Asio
         }
     }
 
-    void TcpSocket::_read(int64_t length, bool read_some, const Php::Value& callback, const Php::Value& argument)
+    template <typename protocol, typename socket_type> template <class>
+    void Socket<protocol, socket_type>::_read(int64_t length, bool read_some, const Php::Value& callback, const Php::Value& argument)
     {
         if (_closed)
             throw Php::Exception("Connection closed.");
@@ -94,7 +112,8 @@ namespace Asio
             async_read(_socket, buffer, handler);
     }
 
-    void TcpSocket::_write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument)
+    template <typename protocol, typename socket_type>
+    template <class> void Socket<protocol, socket_type>::_write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument)
     {
         if (_closed)
             throw Php::Exception("Connection closed.");

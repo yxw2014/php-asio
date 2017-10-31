@@ -1,4 +1,12 @@
+/**
+ * php-asio/include/php-asio/service.hpp
+ *
+ * @author CismonX<admin@cismon.net>
+ */
+
 #pragma once
+
+#include "common.hpp"
 
 namespace Asio
 {
@@ -8,6 +16,7 @@ namespace Asio
      */
     class Service : public Php::Base
     {
+
         /**
          * The io_service of all IO objects in current instance
          */

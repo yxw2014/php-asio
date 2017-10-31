@@ -1,24 +1,24 @@
-#include "includes.hpp"
+/**
+ * php-asio/tcp_server.cpp
+ *
+ * @author CismonX<admin@cismon.net>
+ */
+
+#include "tcp_server.hpp"
 
 namespace Asio
 {
     void TcpServer::_accept()
     {
-        auto connection = new TcpSocket(_io_service);
-        _acceptor->async_accept(connection->getSocket(),
-            boost::bind(&TcpServer::_handler, this, boost::asio::placeholders::error, connection));
+        auto socket = new TcpSocket(_io_service);
+        _acceptor->async_accept(socket->getSocket(),
+            boost::bind(&TcpServer::_handler, this, boost::asio::placeholders::error, socket));
     }
 
     void TcpServer::_handler(const boost::system::error_code& error, const TcpSocket* socket)
     {
-        //Stop outside accept handler callback.
-        if (_stopped)
-        {
-            delete _wrapper;
-            return;
-        }
         _context_flag = true;
-        _callback(this, socket, error.value(), _argument);
+        _callback(this, socket, boost::lexical_cast<int64_t>(error.value()), _argument);
         _context_flag = false;
         if (_stopped)
             delete _wrapper;
@@ -74,6 +74,7 @@ namespace Asio
 
     void TcpServer::stop()
     {
+        _acceptor->cancel();
         _stopped = true;
     }
 

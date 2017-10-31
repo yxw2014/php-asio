@@ -14,6 +14,7 @@ LINKER_DEPENDENCIES =   -lphpcpp -lboost_system
 RM                  =   rm -f
 CP                  =   cp -f
 
+HEADER_DIR          =   src/include/php-asio
 SOURCES             =   $(wildcard src/*.cpp)
 OBJECTS             =   $(SOURCES:%.cpp=%.o)
 
@@ -23,7 +24,7 @@ ${EXTENSION}: ${OBJECTS}
 	${LINKER} ${LINKER_FLAGS} -o $@ ${OBJECTS} ${LINKER_DEPENDENCIES}
 
 ${OBJECTS}:
-	${COMPILER} ${COMPILER_FLAGS} $@ ${@:%.o=%.cpp}
+	${COMPILER} ${COMPILER_FLAGS} $@ ${@:%.o=%.cpp} -I${HEADER_DIR}
 
 install:
 	${CP} ${EXTENSION} ${EXTENSION_DIR}/${EXTENSION}

@@ -1,4 +1,13 @@
+/**
+ * php-asio/include/php-asio/socket.hpp
+ * 
+ * @author CismonX<admin@cismon.net>
+ */
+
 #pragma once
+
+#include "common.hpp"
+#include "base.hpp"
 
 using boost::asio::ip::tcp;
 
@@ -7,12 +16,14 @@ namespace Asio
     /**
      * Wrapper for Boost.Asio stream socket.
      */
-    class TcpSocket : public Base
+    template<typename protocol, typename socket_type>
+    class Socket : public Base
     {
+
         /**
          * Current TCP socket.
          */
-        tcp::socket _socket;
+        socket_type _socket;
 
         /**
          * Whether socket is marked as closed.
@@ -56,6 +67,8 @@ namespace Asio
          * @param callback : Read handler callback
          * @param argument : Extra argument
          */
+        template<class = typename std::enable_if<
+            std::is_same<boost::asio::basic_stream_socket<protocol>, socket_type>::value, socket_type>::type>
         void _read(int64_t length, bool read_some, const Php::Value& callback, const Php::Value& argument);
 
         /**
@@ -65,6 +78,8 @@ namespace Asio
          * @param callback : Read handler callback
          * @param argument : Extra argument
          */
+        template<class = typename std::enable_if<
+            std::is_same<boost::asio::basic_stream_socket<protocol>, socket_type>::value, socket_type>::type>
         void _write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument);
 
     public:
@@ -73,26 +88,30 @@ namespace Asio
          * Constructor.
          * @param io_service : IO service of current TCP socket.
          */
-        explicit TcpSocket(boost::asio::io_service& io_service);
+        explicit Socket(boost::asio::io_service& io_service);
 
         /**
          * Default destructor.
          */
-        virtual ~TcpSocket();
+        virtual ~Socket();
 
         /**
          * Get reference of TCP socket.
          */
-        tcp::socket& getSocket();
+        socket_type& getSocket(); 
 
         /**
          * Read asynchronously from stream socket.
          */
+        template<class = typename std::enable_if<
+            std::is_same<boost::asio::basic_stream_socket<protocol>, socket_type>::value, socket_type>::type>
         void read(Php::Parameters&);
 
         /**
          * Write asynchronously to stream socket.
          */
+        template<class = typename std::enable_if<
+            std::is_same<boost::asio::basic_stream_socket<protocol>, socket_type>::value, socket_type>::type>
         void write(Php::Parameters&);
 
         /**
@@ -112,4 +131,5 @@ namespace Asio
 
     };
 
+    using TcpSocket = Socket<tcp, tcp::socket>;
 }

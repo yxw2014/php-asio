@@ -123,6 +123,63 @@ final class Timer {
 }
 
 /**
+ * Interface Socket
+ *
+ * @package Asio
+ */
+interface Socket {
+
+    /**
+     * Determine the number of bytes available for reading.
+     *
+     * @return int
+     */
+    function available();
+
+    /**
+     * Determine whether the socket is at the out-of-band data mark.
+     *
+     * @return bool
+     */
+    function atMark();
+
+    /**
+     * Close socket.
+     */
+    function close();
+}
+
+/**
+ * Interface StreamSocket
+ *
+ * @package Asio
+ */
+interface StreamSocket extends Socket {
+
+    /**
+     * Asynchronously read from the stream socket.
+     *
+     * @param int $length : Max number of bytes to be read
+     * @param bool $read_some
+     * @param callable $callback : Read handler callback
+     * @param mixed $argument
+     * @throws \Exception
+     */
+    function read(int $length, bool $read_some, callable $callback, $argument = null);
+
+    /**
+     * Asynchronously write to the stream socket.
+     *
+     * @param string $data : Write buffer
+     * @param bool $write_some
+     * @param callable $callback[optional] : Write handler callback
+     * @param mixed $argument
+     * @throws \Exception
+     */
+    function write(string $data, bool $write_some, callable $callback = null, $argument = null);
+}
+
+/**
  * Wrapper for Boost.Asio TCP acceptor.
  *
  * @package Asio
@@ -154,7 +211,7 @@ final class TcpServer {
  *
  * @package Asio
  */
-final class TcpSocket {
+final class TcpSocket implements StreamSocket {
 
     /**
      * This class can only be instantiated by TcpServer and TcpClient.
@@ -162,43 +219,27 @@ final class TcpSocket {
     private function __construct() {}
 
     /**
-     * Asynchronously read from the stream socket.
-     *
-     * @param int $length : Max number of bytes to be read
-     * @param bool $read_some
-     * @param callable $callback : Read handler callback
-     * @param mixed $argument
-     * @throws \Exception
+     * {@inheritdoc}
      */
     function read(int $length, bool $read_some, callable $callback, $argument = null) {}
 
     /**
-     * Asynchronously write to the stream socket.
-     *
-     * @param string $data : Write buffer
-     * @param bool $write_some
-     * @param callable $callback[optional] : Write handler callback
-     * @param mixed $argument
-     * @throws \Exception
+     * {@inheritdoc}
      */
-    function write(string $data, bool $write_some, callable $callback, $argument = null) {}
+    function write(string $data, bool $write_some, callable $callback = null, $argument = null) {}
 
     /**
-     * Determine the number of bytes available for reading.
-     *
-     * @return int
+     * {@inheritdoc}
      */
     function available() {}
 
     /**
-     * Determine whether the socket is at the out-of-band data mark.
-     *
-     * @return bool
+     * {@inheritdoc}
      */
     function atMark() {}
 
     /**
-     * Close TCP socket.
+     * {@inheritdoc}
      */
     function close() {}
 }

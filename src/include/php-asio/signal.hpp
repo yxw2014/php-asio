@@ -1,4 +1,13 @@
+/**
+ * php-asio/include/php-asio/signal.hpp
+ *
+ * @author CismonX<admin@cismon.net>
+ */
+
 #pragma once
+
+#include "common.hpp"
+#include "base.hpp"
 
 namespace Asio
 {

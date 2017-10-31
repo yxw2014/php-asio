@@ -1,4 +1,13 @@
+/**
+ * php-asio/include/php-asio/timer.hpp
+ *
+ * @author CismonX<admin@cismon.net>
+ */
+
 #pragma once
+
+#include "common.hpp"
+#include "base.hpp"
 
 namespace Asio
 {

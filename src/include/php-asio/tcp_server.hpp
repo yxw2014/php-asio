@@ -1,4 +1,14 @@
+/**
+ * php-asio/include/php-asio/tcp_server.hpp
+ *
+ * @author CismonX<admin@cismon.net>
+ */
+
 #pragma once
+
+#include "common.hpp"
+#include "base.hpp"
+#include "socket.hpp"
 
 namespace Asio
 {
