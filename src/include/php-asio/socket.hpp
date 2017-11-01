@@ -21,7 +21,7 @@ namespace Asio
     {
 
         /**
-         * Current TCP socket.
+         * Current socket.
          */
         socket_type _socket;
 
@@ -31,7 +31,7 @@ namespace Asio
         bool _closed = false;
 
         /**
-         * Read handler for TCP socket.
+         * Read/recieve handler for socket.
          * @param error : Error code
          * @param length : Bytes transferred
          * @param callback : Handler callback
@@ -46,7 +46,7 @@ namespace Asio
             std::vector<uint8_t>* buffer);
 
         /**
-         * Write handler for TCP socket.
+         * Write/send handler for socket.
          * @param error : Error code
          * @param length : Bytes transferred
          * @param callback : Handler callback
@@ -125,7 +125,7 @@ namespace Asio
         Php::Value atMark() const;
 
         /**
-         * Close the TCP socket.
+         * Close socket.
          */
         void close();
 
