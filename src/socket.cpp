@@ -51,7 +51,7 @@ namespace Asio
         delete buffer;
     }
 
-    template <typename protocol, typename socket_type> template <class>
+    template <typename protocol, typename socket_type> template<typename>
     void Socket<protocol, socket_type>::read(Php::Parameters& params)
     {
         auto length = params[0].numericValue();
@@ -60,7 +60,7 @@ namespace Asio
         _read(length, params[1].boolValue(), params[2], params.size() == 3 ? Php::Value() : params[3]);
     }
 
-    template <typename protocol, typename socket_type> template <class>
+    template <typename protocol, typename socket_type> template<typename>
     void Socket<protocol, socket_type>::write(Php::Parameters& params)
     {
         auto param_count = params.size();
@@ -95,7 +95,7 @@ namespace Asio
         }
     }
 
-    template <typename protocol, typename socket_type> template <class>
+    template <typename protocol, typename socket_type> template<typename>
     void Socket<protocol, socket_type>::_read(int64_t length, bool read_some, const Php::Value& callback, const Php::Value& argument)
     {
         if (_closed)
@@ -111,7 +111,7 @@ namespace Asio
             async_read(_socket, buffer, handler);
     }
 
-    template <typename protocol, typename socket_type> template <class>
+    template <typename protocol, typename socket_type> template<typename>
     void Socket<protocol, socket_type>::_write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument)
     {
         if (_closed)
@@ -126,5 +126,10 @@ namespace Asio
             async_write(_socket, boost::asio::buffer(*buffer), handler);
     }
 
+    // Instantiation for TcpSocket.
     template class Socket<tcp, tcp::socket>;
+    template void Socket<tcp, tcp::socket>::read(Php::Parameters&);
+    template void Socket<tcp, tcp::socket>::write(Php::Parameters&);
+    template void Socket<tcp, tcp::socket>::_read(int64_t, bool, const Php::Value&, const Php::Value&);
+    template void Socket<tcp, tcp::socket>::_write(const std::string&, bool, const Php::Value&, const Php::Value&);
 }

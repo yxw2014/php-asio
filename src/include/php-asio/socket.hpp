@@ -67,7 +67,7 @@ namespace Asio
          * @param callback : Read handler callback
          * @param argument : Extra argument
          */
-        template<class = typename std::enable_if<
+        template<typename = typename std::enable_if<
             std::is_same<boost::asio::basic_stream_socket<protocol>, socket_type>::value, socket_type>::type>
         void _read(int64_t length, bool read_some, const Php::Value& callback, const Php::Value& argument);
 
@@ -78,7 +78,7 @@ namespace Asio
          * @param callback : Read handler callback
          * @param argument : Extra argument
          */
-        template<class = typename std::enable_if<
+        template<typename = typename std::enable_if<
             std::is_same<boost::asio::basic_stream_socket<protocol>, socket_type>::value, socket_type>::type>
         void _write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument);
 
@@ -103,14 +103,14 @@ namespace Asio
         /**
          * Read asynchronously from stream socket.
          */
-        template<class = typename std::enable_if<
+        template<typename = typename std::enable_if<
             std::is_same<boost::asio::basic_stream_socket<protocol>, socket_type>::value, socket_type>::type>
         void read(Php::Parameters&);
 
         /**
          * Write asynchronously to stream socket.
          */
-        template<class = typename std::enable_if<
+        template<typename = typename std::enable_if<
             std::is_same<boost::asio::basic_stream_socket<protocol>, socket_type>::value, socket_type>::type>
         void write(Php::Parameters&);
 
