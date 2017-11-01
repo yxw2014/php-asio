@@ -77,5 +77,4 @@ namespace Asio
         _acceptor->cancel();
         _stopped = true;
     }
-
 }

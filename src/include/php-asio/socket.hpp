@@ -96,7 +96,7 @@ namespace Asio
         virtual ~Socket();
 
         /**
-         * Get reference of TCP socket.
+         * Get reference of socket.
          */
         socket_type& getSocket(); 
 

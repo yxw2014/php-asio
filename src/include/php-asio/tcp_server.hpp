@@ -94,5 +94,4 @@ namespace Asio
          */
         void stop();
     };
-
 }

@@ -34,7 +34,6 @@ namespace Asio
         const Php::Value& argument,
         std::vector<uint8_t>* buffer)
     {
-        //Errno 125: Operation cancelled.
         callback(this, std::string(buffer->begin(), buffer->end()), boost::numeric_cast<int64_t>(length), error.value(), argument);
         delete buffer;
     }
@@ -112,8 +111,8 @@ namespace Asio
             async_read(_socket, buffer, handler);
     }
 
-    template <typename protocol, typename socket_type>
-    template <class> void Socket<protocol, socket_type>::_write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument)
+    template <typename protocol, typename socket_type> template <class>
+    void Socket<protocol, socket_type>::_write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument)
     {
         if (_closed)
             throw Php::Exception("Connection closed.");
@@ -127,4 +126,5 @@ namespace Asio
             async_write(_socket, boost::asio::buffer(*buffer), handler);
     }
 
+    template class Socket<tcp, tcp::socket>;
 }

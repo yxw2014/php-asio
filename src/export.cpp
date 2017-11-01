@@ -114,6 +114,8 @@ extern "C" PHPCPP_EXPORT void* get_module()
     signal.method<&Signal::clear>("clear");
     signal.method<&Signal::cancel>("cancel");
 
+    asio.add(std::move(socket));
+    asio.add(std::move(stream_socket));
     asio.add(std::move(service));
     asio.add(std::move(timer));
     asio.add(std::move(tcp_server));
