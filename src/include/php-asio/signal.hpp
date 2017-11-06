@@ -46,7 +46,6 @@ namespace Asio
         void _wait();
 
     public:
-
         /**
          * Constructor.
          * @param io_service : IO service for current signal handler
@@ -88,5 +87,6 @@ namespace Asio
          * Cancel current signal handler.
          */
         void cancel();
+
     };
 }

@@ -82,7 +82,6 @@ namespace Asio
         void _write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument);
 
     public:
-
         /**
          * Constructor.
          * @param io_service : IO service of current TCP socket.

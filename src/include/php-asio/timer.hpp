@@ -16,7 +16,6 @@ namespace Asio
      */
     class Timer : public Base
     {
-
         /**
          * Boost.Asio timer instance.
          */
@@ -59,7 +58,6 @@ namespace Asio
         void _handler(const boost::system::error_code& error);
 
     public:
-
         /**
          * Timer constructor.
          * @param io_service : IO service for current timer
@@ -89,6 +87,7 @@ namespace Asio
          * Set timer's persistant attribute to false.
          */
         void cancel();
+
     };
 
 }

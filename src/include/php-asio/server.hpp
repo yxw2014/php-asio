@@ -64,7 +64,6 @@ namespace Asio
         void _wrap();
 
     public:
-
         /**
          * Constructor.
          * @param io_service : IO service for current TCP server.

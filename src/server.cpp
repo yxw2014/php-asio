@@ -20,7 +20,7 @@ namespace Asio
     void Server<protocol>::_handler(const boost::system::error_code& error, const Socket<protocol>* socket)
     {
         _context_flag = true;
-        _callback(this, socket, boost::lexical_cast<int64_t>(error.value()), _argument);
+        _callback(this, socket, boost::numeric_cast<int64_t>(error.value()), _argument);
         _context_flag = false;
         if (_stopped)
             delete _wrapper;
