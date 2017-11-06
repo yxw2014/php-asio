@@ -59,9 +59,7 @@ namespace Asio
          * @param error : Error code
          * @param socket : Client connection
          */
-        void _handler(const boost::system::error_code& error, const Socket<protocol>* socket);
-
-        void _wrap();
+        void _handler(const boost::system::error_code& error, Socket<protocol>* const socket);
 
     public:
         /**
@@ -87,14 +85,12 @@ namespace Asio
          * @param address : Address which the server will bind to.
          * @param port : Port which the server will bind to.
          */
-        template <typename _P = protocol, typename = typename std::enable_if<std::is_class<typename _P::resolver>::value, _P>::type>
         void initAcceptor(const std::string& address, unsigned short port);
 
         /**
          * Init acceptor for local sockets.
          * @param path : Socket path.
          */
-        template <typename _P = protocol, typename = typename std::enable_if<!std::is_class<typename _P::resolver>::value, _P>::type>
         void initAcceptor(const std::string& path);
 
         /**
@@ -109,5 +105,6 @@ namespace Asio
 
     };
 
-    using TcpServer = Server<tcp>;
+    using TcpServer = Server<boost::asio::ip::tcp>;
+    using UnixServer = Server<boost::asio::local::stream_protocol>;
 }

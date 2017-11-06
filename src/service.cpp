@@ -33,6 +33,16 @@ namespace Asio
         return server;
     }
 
+    Php::Value Service::addUnixServer(Php::Parameters& params)
+    {
+        auto param_count = params.size();
+        auto server = new UnixServer(_io_service, param_count > 1,
+            param_count < 3 ? Php::Value() : params[2],
+            param_count == 1 ? Php::Value() : params[1]);
+        server->initAcceptor(params[0].stringValue());
+        return server;
+    }
+
     Php::Value Service::addSignal(Php::Parameters& params)
     {
         auto param_count = params.size();

@@ -56,6 +56,11 @@ namespace Asio
         Php::Value addTcpServer(Php::Parameters&);
 
         /**
+        * Create a new UNIX domain socket server (SOCK_STREAM) and start listening.
+        */
+        Php::Value addUnixServer(Php::Parameters&);
+
+        /**
          * Add new signal handler.
          */
         Php::Value addSignal(Php::Parameters&);
@@ -99,6 +104,6 @@ namespace Asio
          * Execute a given callback with argument at the next tick.
          */
         void post(Php::Parameters&);
-    };
 
+    };
 }

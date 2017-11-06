@@ -40,6 +40,17 @@ class Service {
     function addTcpServer(string $address, int $port, callable $callback, $argument = null) {}
 
     /**
+     * Add UNIX stream socket server.
+     *
+     * @param string $path : Path to socket file.
+     * @param callable $callback[optional] : Acceptor callback
+     * @param null $argument
+     * @throws \Exception
+     * @return UnixServer
+     */
+    function addUnixServer(string $path, callable $callback, $argument = null) {}
+
+    /**
      * Add signal handler.
      *
      * @param callable $callback
@@ -180,16 +191,11 @@ interface StreamSocket extends Socket {
 }
 
 /**
- * Wrapper for Boost.Asio TCP acceptor.
+ * Interface Server
  *
  * @package Asio
  */
-final class TcpServer {
-
-    /**
-     * This class can only be instantiated using "Service::addTcpServer()".
-     */
-    private function __construct() {}
+interface Server {
 
     /**
      * Accept incoming client connection once.
@@ -198,10 +204,56 @@ final class TcpServer {
      * @param mixed $argument
      * @throws \Exception
      */
+    function accept(callable $callback, $argument = null);
+
+    /**
+     * Stop server and cancel all async operations related to it.
+     */
+    function stop();
+}
+
+/**
+ * Wrapper for Boost.Asio TCP acceptor.
+ *
+ * @package Asio
+ */
+final class TcpServer implements Server {
+
+    /**
+     * This class can only be instantiated using "Service::addTcpServer()".
+     */
+    private function __construct() {}
+
+    /**
+     * {@inheritdoc}
+     */
     function accept(callable $callback, $argument = null) {}
 
     /**
-     * Stop TCP server and cancel all async operations related to it.
+     * {@inheritdoc}
+     */
+    function stop() {}
+}
+
+/**
+ * Wrapper for Boost.Asio local stream_protocol acceptor.
+ *
+ * @package Asio
+ */
+final class UnixServer implements Server {
+
+    /**
+     * This class can only be instantiated using "Service::addUnixServer()".
+     */
+    private function __construct() {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function accept(callable $callback, $argument = null) {}
+
+    /**
+     * {@inheritdoc}
      */
     function stop() {}
 }
@@ -214,7 +266,45 @@ final class TcpServer {
 final class TcpSocket implements StreamSocket {
 
     /**
-     * This class can only be instantiated by TcpServer and TcpClient.
+     * This class can only be instantiated by TcpServer.
+     */
+    private function __construct() {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function read(int $length, bool $read_some, callable $callback, $argument = null) {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function write(string $data, bool $write_some, callable $callback = null, $argument = null) {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function available() {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function atMark() {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function close() {}
+}
+
+/**
+ * Wrapper for Boost.Asio local stream_protocol socket.
+ *
+ * @package Asio
+ */
+final class UnixSocket implements StreamSocket {
+
+    /**
+     * This class can only be instantiated by UnixServer.
      */
     private function __construct() {}
 

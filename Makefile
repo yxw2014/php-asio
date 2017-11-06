@@ -9,7 +9,7 @@ LINKER              =   g++
 
 COMPILER_FLAGS      =   -Wall -c -O2 -std=c++11 -fpic -o
 LINKER_FLAGS        =   -shared
-LINKER_DEPENDENCIES =   -lphpcpp -lboost_system
+LINKER_DEPENDENCIES =   -lphpcpp -lboost_system -lboost_filesystem
 
 RM                  =   rm -f
 CP                  =   cp -f

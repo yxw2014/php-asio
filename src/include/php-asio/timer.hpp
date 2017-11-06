@@ -89,5 +89,4 @@ namespace Asio
         void cancel();
 
     };
-
 }

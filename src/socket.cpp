@@ -8,16 +8,35 @@
 
 namespace Asio
 {
-    template <>
-    Socket<tcp>::Socket(boost::asio::io_service& io_service) : Base(io_service), _socket(io_service)
-    {
-        _wrapper = new Php::Object("Asio\\TcpSocket", this);
-    }
+    template <typename protocol>
+    Socket<protocol>::Socket(boost::asio::io_service& io_service) : Base(io_service), _socket(io_service) {}
 
     template <typename protocol>
     Socket<protocol>::~Socket()
     {
         close();
+    }
+
+    template <>
+    void TcpSocket::wrap()
+    {
+        _wrapper = new Php::Object("Asio\\TcpSocket", this);
+    }
+
+    template <>
+    void UnixSocket::wrap()
+    {
+        _wrapper = new Php::Object("Asio\\UnixSocket", this);
+    }
+
+    template <typename protocol>
+    void Socket<protocol>::unwrap()
+    {
+        if (_wrapper != nullptr)
+        {
+            delete _wrapper;
+            _wrapper = nullptr;
+        }
     }
 
     template <typename protocol>
@@ -88,22 +107,17 @@ namespace Asio
             _closed = true;
             _socket.close();
         }
-        if (_wrapper != nullptr)
-        {
-            delete _wrapper;
-            _wrapper = nullptr;
-        }
     }
 
     template <typename protocol> template <typename, typename>
     void Socket<protocol>::_read(int64_t length, bool read_some, const Php::Value& callback, const Php::Value& argument)
     {
         if (_closed)
-            throw Php::Exception("Connection closed.");
+            return;
         auto size = boost::numeric_cast<size_t>(length);
         auto buffer_container = new std::vector<uint8_t>(size);
         auto buffer = boost::asio::buffer(*buffer_container, size);
-        auto handler = boost::bind(&TcpSocket::_read_handler, this, boost::asio::placeholders::error,
+        auto handler = boost::bind(&Socket::_read_handler, this, boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred, callback, argument, buffer_container);
         if (read_some)
             _socket.async_read_some(buffer, handler);
@@ -115,10 +129,10 @@ namespace Asio
     void Socket<protocol>::_write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument)
     {
         if (_closed)
-            throw Php::Exception("Connection closed.");
+            return;
         // Note that `data` gets out of scope when handler callback is called.
         auto buffer = new std::string(data);
-        auto handler = boost::bind(&TcpSocket::_write_handler, this, boost::asio::placeholders::error,
+        auto handler = boost::bind(&Socket::_write_handler, this, boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred, callback, argument, buffer);
         if (write_some)
             _socket.async_write_some(boost::asio::buffer(*buffer), handler);
@@ -127,9 +141,16 @@ namespace Asio
     }
 
     // Instantiation for TcpSocket.
-    template class Socket<tcp>;
-    template void Socket<tcp>::read(Php::Parameters&);
-    template void Socket<tcp>::write(Php::Parameters&);
-    template void Socket<tcp>::_read(int64_t, bool, const Php::Value&, const Php::Value&);
-    template void Socket<tcp>::_write(const std::string&, bool, const Php::Value&, const Php::Value&);
+    template class Socket<boost::asio::ip::tcp>;
+    template void Socket<boost::asio::ip::tcp>::read(Php::Parameters&);
+    template void Socket<boost::asio::ip::tcp>::write(Php::Parameters&);
+    template void Socket<boost::asio::ip::tcp>::_read(int64_t, bool, const Php::Value&, const Php::Value&);
+    template void Socket<boost::asio::ip::tcp>::_write(const std::string&, bool, const Php::Value&, const Php::Value&);
+
+    // Instantiation for UnixSocket.
+    template class Socket<boost::asio::local::stream_protocol>;
+    template void Socket<boost::asio::local::stream_protocol>::read(Php::Parameters&);
+    template void Socket<boost::asio::local::stream_protocol>::write(Php::Parameters&);
+    template void Socket<boost::asio::local::stream_protocol>::_read(int64_t, bool, const Php::Value&, const Php::Value&);
+    template void Socket<boost::asio::local::stream_protocol>::_write(const std::string&, bool, const Php::Value&, const Php::Value&);
 }
