@@ -6,7 +6,7 @@
 
 #include "service.hpp"
 #include "timer.hpp"
-#include "tcp_server.hpp"
+#include "server.hpp"
 #include "signal.hpp"
 
 namespace Asio
@@ -26,10 +26,11 @@ namespace Asio
         if (port < 0 || port > 65535)
             throw Php::Exception("Bad port number.");
         auto param_count = params.size();
-        return new TcpServer(_io_service, params[0].stringValue(),
-            boost::numeric_cast<unsigned short>(port), param_count > 2,
+        auto server = new TcpServer(_io_service, param_count > 2,
             param_count < 4 ? Php::Value() : params[3],
             param_count == 2 ? Php::Value() : params[2]);
+        server->initAcceptor(params[0].stringValue(), boost::numeric_cast<unsigned short>(port));
+        return server;
     }
 
     Php::Value Service::addSignal(Php::Parameters& params)

@@ -16,14 +16,13 @@ namespace Asio
     /**
      * Wrapper for Boost.Asio stream socket.
      */
-    template<typename protocol, typename socket_type>
+    template<typename protocol>
     class Socket : public Base
     {
-
         /**
          * Current socket.
          */
-        socket_type _socket;
+        typename protocol::socket _socket;
 
         /**
          * Whether socket is marked as closed.
@@ -67,8 +66,8 @@ namespace Asio
          * @param callback : Read handler callback
          * @param argument : Extra argument
          */
-        template<typename = typename std::enable_if<
-            std::is_same<boost::asio::basic_stream_socket<protocol>, socket_type>::value, socket_type>::type>
+        template<typename _P = protocol, typename = typename std::enable_if<
+            std::is_same<boost::asio::basic_stream_socket<_P>, typename _P::socket>::value, typename _P::socket>::type>
         void _read(int64_t length, bool read_some, const Php::Value& callback, const Php::Value& argument);
 
         /**
@@ -78,8 +77,8 @@ namespace Asio
          * @param callback : Read handler callback
          * @param argument : Extra argument
          */
-        template<typename = typename std::enable_if<
-            std::is_same<boost::asio::basic_stream_socket<protocol>, socket_type>::value, socket_type>::type>
+        template<typename _P = protocol, typename = typename std::enable_if<
+            std::is_same<boost::asio::basic_stream_socket<_P>, typename _P::socket>::value, typename _P::socket>::type>
         void _write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument);
 
     public:
@@ -98,20 +97,20 @@ namespace Asio
         /**
          * Get reference of socket.
          */
-        socket_type& getSocket(); 
+        typename protocol::socket& getSocket(); 
 
         /**
          * Read asynchronously from stream socket.
          */
-        template<typename = typename std::enable_if<
-            std::is_same<boost::asio::basic_stream_socket<protocol>, socket_type>::value, socket_type>::type>
+        template<typename _P = protocol, typename = typename std::enable_if<
+            std::is_same<boost::asio::basic_stream_socket<_P>, typename _P::socket>::value, typename _P::socket>::type>
         void read(Php::Parameters&);
 
         /**
          * Write asynchronously to stream socket.
          */
-        template<typename = typename std::enable_if<
-            std::is_same<boost::asio::basic_stream_socket<protocol>, socket_type>::value, socket_type>::type>
+        template<typename _P = protocol, typename = typename std::enable_if<
+            std::is_same<boost::asio::basic_stream_socket<_P>, typename _P::socket>::value, typename _P::socket>::type>
         void write(Php::Parameters&);
 
         /**
@@ -131,5 +130,5 @@ namespace Asio
 
     };
 
-    using TcpSocket = Socket<tcp, tcp::socket>;
+    using TcpSocket = Socket<tcp>;
 }

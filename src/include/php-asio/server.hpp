@@ -1,5 +1,5 @@
 /**
- * php-asio/include/php-asio/tcp_server.hpp
+ * php-asio/include/php-asio/server.hpp
  *
  * @author CismonX<admin@cismon.net>
  */
@@ -13,16 +13,16 @@
 namespace Asio
 {
     /**
-     * Wrapper for Boost.Asio TCP acceptor.
+     * Wrapper for Boost.Asio stream socket acceptor.
      * Provide TCP services.
      */
-    class TcpServer : public Base
+    template<typename protocol>
+    class Server : public Base
     {
-
         /**
          * Acceptor for this server.
          */
-        tcp::acceptor* _acceptor;
+        typename protocol::acceptor* _acceptor;
 
         /**
          * Argument to be passed to acceptor callback.
@@ -59,22 +59,21 @@ namespace Asio
          * @param error : Error code
          * @param socket : Client connection
          */
-        void _handler(const boost::system::error_code& error, const TcpSocket* socket);
+        void _handler(const boost::system::error_code& error, const Socket<protocol>* socket);
+
+        void _wrap();
 
     public:
 
         /**
          * Constructor.
          * @param io_service : IO service for current TCP server.
-         * @param address : Address which the server will bind to.
-         * @param port : Port which the server will bind to.
+         * @param auto_accept : Whether to start accepting once server is created.
          * @param argument : Extra argument to be passed to acceptor callback.
          * @param callback : Acceptor callback.
          */
-        explicit TcpServer(
+        explicit Server(
             boost::asio::io_service& io_service,
-            const std::string& address,
-            unsigned short port,
             bool auto_accept,
             const Php::Value& argument,
             const Php::Value& callback);
@@ -82,7 +81,22 @@ namespace Asio
         /**
          * Destructor.
          */
-        virtual ~TcpServer();
+        virtual ~Server();
+
+        /**
+         * Init acceptor for IP-based sockets.
+         * @param address : Address which the server will bind to.
+         * @param port : Port which the server will bind to.
+         */
+        template <typename _P = protocol, typename = typename std::enable_if<std::is_class<typename _P::resolver>::value, _P>::type>
+        void initAcceptor(const std::string& address, unsigned short port);
+
+        /**
+         * Init acceptor for local sockets.
+         * @param path : Socket path.
+         */
+        template <typename _P = protocol, typename = typename std::enable_if<!std::is_class<typename _P::resolver>::value, _P>::type>
+        void initAcceptor(const std::string& path);
 
         /**
          * Accept incoming client connection once.
@@ -90,8 +104,11 @@ namespace Asio
         void accept(Php::Parameters&);
 
         /**
-         * Stop TCP server.
+         * Stop server.
          */
         void stop();
+
     };
+
+    using TcpServer = Server<tcp>;
 }

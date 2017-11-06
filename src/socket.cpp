@@ -9,25 +9,25 @@
 namespace Asio
 {
     template <>
-    TcpSocket::Socket(boost::asio::io_service& io_service) : Base(io_service), _socket(io_service)
+    Socket<tcp>::Socket(boost::asio::io_service& io_service) : Base(io_service), _socket(io_service)
     {
         _wrapper = new Php::Object("Asio\\TcpSocket", this);
     }
 
-    template <typename protocol, typename socket_type>
-    Socket<protocol, socket_type>::~Socket()
+    template <typename protocol>
+    Socket<protocol>::~Socket()
     {
         close();
     }
 
-    template <typename protocol, typename socket_type>
-    socket_type& Socket<protocol, socket_type>::getSocket()
+    template <typename protocol>
+    typename protocol::socket& Socket<protocol>::getSocket()
     {
         return _socket;
     }
 
-    template <typename protocol, typename socket_type>
-    void Socket<protocol, socket_type>::_read_handler(
+    template <typename protocol>
+    void Socket<protocol>::_read_handler(
         const boost::system::error_code& error,
         size_t length,
         const Php::Value& callback,
@@ -38,8 +38,8 @@ namespace Asio
         delete buffer;
     }
 
-    template <typename protocol, typename socket_type>
-    void Socket<protocol, socket_type>::_write_handler(
+    template <typename protocol>
+    void Socket<protocol>::_write_handler(
         const boost::system::error_code& error,
         size_t length,
         const Php::Value& callback,
@@ -51,8 +51,8 @@ namespace Asio
         delete buffer;
     }
 
-    template <typename protocol, typename socket_type> template<typename>
-    void Socket<protocol, socket_type>::read(Php::Parameters& params)
+    template <typename protocol> template <typename, typename>
+    void Socket<protocol>::read(Php::Parameters& params)
     {
         auto length = params[0].numericValue();
         if (length < 0)
@@ -60,28 +60,28 @@ namespace Asio
         _read(length, params[1].boolValue(), params[2], params.size() == 3 ? Php::Value() : params[3]);
     }
 
-    template <typename protocol, typename socket_type> template<typename>
-    void Socket<protocol, socket_type>::write(Php::Parameters& params)
+    template <typename protocol> template <typename, typename>
+    void Socket<protocol>::write(Php::Parameters& params)
     {
         auto param_count = params.size();
         _write(params[0].stringValue(), params[1].boolValue(), param_count < 3 ? Php::Value() : params[2],
             param_count < 4 ? Php::Value() : params[3]);
     }
 
-    template <typename protocol, typename socket_type>
-    Php::Value Socket<protocol, socket_type>::available() const
+    template <typename protocol>
+    Php::Value Socket<protocol>::available() const
     {
         return boost::numeric_cast<int64_t>(_socket.available());
     }
 
-    template <typename protocol, typename socket_type>
-    Php::Value Socket<protocol, socket_type>::atMark() const
+    template <typename protocol>
+    Php::Value Socket<protocol>::atMark() const
     {
         return _socket.at_mark();
     }
 
-    template <typename protocol, typename socket_type>
-    void Socket<protocol, socket_type>::close()
+    template <typename protocol>
+    void Socket<protocol>::close()
     {
         if (!_closed)
         {
@@ -95,8 +95,8 @@ namespace Asio
         }
     }
 
-    template <typename protocol, typename socket_type> template<typename>
-    void Socket<protocol, socket_type>::_read(int64_t length, bool read_some, const Php::Value& callback, const Php::Value& argument)
+    template <typename protocol> template <typename, typename>
+    void Socket<protocol>::_read(int64_t length, bool read_some, const Php::Value& callback, const Php::Value& argument)
     {
         if (_closed)
             throw Php::Exception("Connection closed.");
@@ -111,8 +111,8 @@ namespace Asio
             async_read(_socket, buffer, handler);
     }
 
-    template <typename protocol, typename socket_type> template<typename>
-    void Socket<protocol, socket_type>::_write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument)
+    template <typename protocol> template <typename, typename>
+    void Socket<protocol>::_write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument)
     {
         if (_closed)
             throw Php::Exception("Connection closed.");
@@ -127,9 +127,9 @@ namespace Asio
     }
 
     // Instantiation for TcpSocket.
-    template class Socket<tcp, tcp::socket>;
-    template void Socket<tcp, tcp::socket>::read(Php::Parameters&);
-    template void Socket<tcp, tcp::socket>::write(Php::Parameters&);
-    template void Socket<tcp, tcp::socket>::_read(int64_t, bool, const Php::Value&, const Php::Value&);
-    template void Socket<tcp, tcp::socket>::_write(const std::string&, bool, const Php::Value&, const Php::Value&);
+    template class Socket<tcp>;
+    template void Socket<tcp>::read(Php::Parameters&);
+    template void Socket<tcp>::write(Php::Parameters&);
+    template void Socket<tcp>::_read(int64_t, bool, const Php::Value&, const Php::Value&);
+    template void Socket<tcp>::_write(const std::string&, bool, const Php::Value&, const Php::Value&);
 }
