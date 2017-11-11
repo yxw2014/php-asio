@@ -71,8 +71,9 @@ namespace Asio
         using unix = boost::asio::local::stream_protocol;
         try
         {
-            //Unlink socket file before binding.
-            boost::filesystem::remove(path);
+            // Unlink socket file before binding.
+            if (boost::filesystem::status(path).type() == boost::filesystem::socket_file)
+                boost::filesystem::remove(path);
             unix::endpoint endpoint(path);
             acceptor_ = new unix::acceptor(io_service_, endpoint);
         }
@@ -108,10 +109,12 @@ namespace Asio
         if (!stopped_)
         {
             stopped_ = true;
-            acceptor_->cancel();
-            acceptor_->close();
             if (acceptor_)
+            {
+                acceptor_->cancel();
+                acceptor_->close();
                 delete acceptor_;
+            }
         }
     }
 
