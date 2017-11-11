@@ -22,7 +22,7 @@ namespace Asio
         /**
          * Acceptor for this server.
          */
-        typename Protocol::acceptor* acceptor_;
+        typename Protocol::acceptor* acceptor_ = nullptr;
 
         /**
          * Argument to be passed to acceptor callback.

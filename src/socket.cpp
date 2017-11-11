@@ -105,6 +105,7 @@ namespace Asio
         if (!closed_)
         {
             closed_ = true;
+            socket_.cancel();
             socket_.close();
         }
     }

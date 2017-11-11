@@ -43,11 +43,7 @@ namespace Asio
     template <typename Protocol>
     Server<Protocol>::~Server()
     {
-        if (acceptor_ != nullptr)
-        {
-            acceptor_->close();
-            delete acceptor_;
-        }
+        stop();
     }
 
     template <>
@@ -56,7 +52,7 @@ namespace Asio
         using boost::asio::ip::tcp;
         try
         {
-           tcp::endpoint endpoint(boost::asio::ip::address::from_string(address), port);
+            tcp::endpoint endpoint(boost::asio::ip::address::from_string(address), port);
             acceptor_ = new tcp::acceptor(io_service_, endpoint);
         }
         catch (boost::system::system_error& error)
@@ -72,13 +68,13 @@ namespace Asio
     template <>
     void UnixServer::init_acceptor(const std::string& path)
     {
-        using boost::asio::local::stream_protocol;
+        using unix = boost::asio::local::stream_protocol;
         try
         {
             //Unlink socket file before binding.
             boost::filesystem::remove(path);
-            stream_protocol::endpoint endpoint(path);
-            acceptor_ = new stream_protocol::acceptor(io_service_, endpoint);
+            unix::endpoint endpoint(path);
+            acceptor_ = new unix::acceptor(io_service_, endpoint);
         }
         catch (boost::system::system_error& error)
         {
@@ -93,6 +89,8 @@ namespace Asio
     template <typename Protocol>
     void Server<Protocol>::accept(Php::Parameters& params)
     {
+        if (stopped_)
+            return;
         if (auto_accept_)
             throw Php::Exception("Server is working in auto-accept mode.");
         auto param_count = params.size();
@@ -107,8 +105,14 @@ namespace Asio
     template <typename Protocol>
     void Server<Protocol>::stop()
     {
-        acceptor_->cancel();
-        stopped_ = true;
+        if (!stopped_)
+        {
+            stopped_ = true;
+            acceptor_->cancel();
+            acceptor_->close();
+            if (acceptor_)
+                delete acceptor_;
+        }
     }
 
     // Instantiation for TcpServer.
