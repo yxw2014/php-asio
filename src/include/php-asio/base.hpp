@@ -17,12 +17,12 @@ namespace Asio
         /**
          * IO service of this object.
          */
-        boost::asio::io_service& _io_service;
+        boost::asio::io_service& io_service_;
 
         /**
          * PHP wrapper for this object.
          */
-        Php::Object* _wrapper;
+        Php::Object* wrapper_;
 
         /**
          * Constructor.

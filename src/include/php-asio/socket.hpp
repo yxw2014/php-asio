@@ -14,18 +14,18 @@ namespace Asio
     /**
      * Wrapper for Boost.Asio stream socket.
      */
-    template<typename protocol>
+    template <typename Protocol>
     class Socket : public Base
     {
         /**
          * Current socket.
          */
-        typename protocol::socket _socket;
+        typename Protocol::socket socket_;
 
         /**
          * Whether socket is marked as closed.
          */
-        bool _closed = false;
+        bool closed_ = false;
 
         /**
          * Read/recieve handler for socket.
@@ -35,7 +35,7 @@ namespace Asio
          * @param argument : Extra argument
          * @param buffer : Read buffer
          */
-        void _read_handler(
+        void read_handler(
             const boost::system::error_code& error,
             size_t length,
             const Php::Value& callback,
@@ -50,7 +50,7 @@ namespace Asio
          * @param argument : Extra argument
          * @param buffer : Write buffer
          */
-        void _write_handler(
+        void write_handler(
             const boost::system::error_code& error,
             size_t length,
             const Php::Value& callback,
@@ -64,9 +64,9 @@ namespace Asio
          * @param callback : Read handler callback
          * @param argument : Extra argument
          */
-        template<typename _P = protocol, typename = typename std::enable_if<
-            std::is_same<boost::asio::basic_stream_socket<_P>, typename _P::socket>::value>::type>
-        void _read(int64_t length, bool read_some, const Php::Value& callback, const Php::Value& argument);
+        template<typename P = Protocol, typename = typename std::enable_if<
+            std::is_same<boost::asio::basic_stream_socket<P>, typename P::socket>::value>::type>
+        void read(int64_t length, bool read_some, const Php::Value& callback, const Php::Value& argument);
 
         /**
          * The internal write method.
@@ -75,9 +75,9 @@ namespace Asio
          * @param callback : Read handler callback
          * @param argument : Extra argument
          */
-        template<typename _P = protocol, typename = typename std::enable_if<
-            std::is_same<boost::asio::basic_stream_socket<_P>, typename _P::socket>::value>::type>
-        void _write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument);
+        template<typename P = Protocol, typename = typename std::enable_if<
+            std::is_same<boost::asio::basic_stream_socket<P>, typename P::socket>::value>::type>
+        void write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument);
 
     public:
         /**
@@ -104,20 +104,20 @@ namespace Asio
         /**
          * Get reference of socket.
          */
-        typename protocol::socket& getSocket(); 
+        typename Protocol::socket& getSocket(); 
 
         /**
          * Read asynchronously from stream socket.
          */
-        template<typename _P = protocol, typename = typename std::enable_if<
-            std::is_same<boost::asio::basic_stream_socket<_P>, typename _P::socket>::value>::type>
+        template<typename P = Protocol, typename = typename std::enable_if<
+            std::is_same<boost::asio::basic_stream_socket<P>, typename P::socket>::value>::type>
         void read(Php::Parameters&);
 
         /**
          * Write asynchronously to stream socket.
          */
-        template<typename _P = protocol, typename = typename std::enable_if<
-            std::is_same<boost::asio::basic_stream_socket<_P>, typename _P::socket>::value>::type>
+        template<typename P = Protocol, typename = typename std::enable_if<
+            std::is_same<boost::asio::basic_stream_socket<P>, typename P::socket>::value>::type>
         void write(Php::Parameters&);
 
         /**
@@ -128,7 +128,7 @@ namespace Asio
         /**
          * Determine whether the socket is at the out-of-band data mark.
          */
-        Php::Value atMark() const;
+        Php::Value at_mark() const;
 
         /**
          * Close socket.

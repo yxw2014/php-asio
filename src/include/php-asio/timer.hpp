@@ -19,43 +19,45 @@ namespace Asio
         /**
          * Boost.Asio timer instance.
          */
-        boost::asio::deadline_timer _timer;
+        boost::asio::deadline_timer timer_;
 
         /**
          * Timer interval(milliseconds).
          */
-        int64_t _interval;
+        int64_t interval_;
 
         /**
          * Argument to be passed to timer callback.
          */
-        Php::Value _argument;
+        Php::Value argument_;
 
         /**
          * Timer callback.
          */
-        Php::Value _callback;
+        Php::Value callback_;
 
         /**
          * Whether timer is persistent.
          */
-        bool _persistent;
+        bool persistent_;
 
         /**
          * Boolean flag for execution context.
          */
-        bool _context_flag = false;
+        bool context_flag_ = false;
 
         /**
          * Defer the timer.
+         * 
+         * The void* argument is to prevent ambiguous call when adding method.
          */
-        void _defer();
+        void defer(void* = nullptr);
 
         /**
          * Handler for timer callback.
          * @param error : error code
          */
-        void _handler(const boost::system::error_code& error);
+        void handler(const boost::system::error_code& error);
 
     public:
         /**

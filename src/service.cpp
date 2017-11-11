@@ -11,42 +11,42 @@
 
 namespace Asio
 {
-    Php::Value Service::addTimer(Php::Parameters& params)
+    Php::Value Service::add_timer(Php::Parameters& params)
     {
         auto callback = params[1];
         auto param_count = params.size();
-        return new Timer(_io_service, params[0].numericValue(),
+        return new Timer(io_service_, params[0].numericValue(),
             param_count == 2 ? Php::Value() : params[2], callback,
             param_count < 4 ? true : params[3].boolValue());
     }
 
-    Php::Value Service::addTcpServer(Php::Parameters& params)
+    Php::Value Service::add_tcp_server(Php::Parameters& params)
     {
         auto port = params[1].numericValue();
         if (port < 0 || port > 65535)
             throw Php::Exception("Bad port number.");
         auto param_count = params.size();
-        auto server = new TcpServer(_io_service, param_count > 2,
+        auto server = new TcpServer(io_service_, param_count > 2,
             param_count < 4 ? Php::Value() : params[3],
             param_count == 2 ? Php::Value() : params[2]);
-        server->initAcceptor(params[0].stringValue(), boost::numeric_cast<unsigned short>(port));
+        server->init_acceptor(params[0].stringValue(), boost::numeric_cast<unsigned short>(port));
         return server;
     }
 
-    Php::Value Service::addUnixServer(Php::Parameters& params)
+    Php::Value Service::add_unix_server(Php::Parameters& params)
     {
         auto param_count = params.size();
-        auto server = new UnixServer(_io_service, param_count > 1,
+        auto server = new UnixServer(io_service_, param_count > 1,
             param_count < 3 ? Php::Value() : params[2],
             param_count == 1 ? Php::Value() : params[1]);
-        server->initAcceptor(params[0].stringValue());
+        server->init_acceptor(params[0].stringValue());
         return server;
     }
 
-    Php::Value Service::addSignal(Php::Parameters& params)
+    Php::Value Service::add_signal(Php::Parameters& params)
     {
         auto param_count = params.size();
-        auto signal = new Signal(_io_service, param_count == 1 ? Php::Value() : params[1], params[0]);
+        auto signal = new Signal(io_service_, param_count == 1 ? Php::Value() : params[1], params[0]);
         if (param_count > 2)
             signal->add({ params.begin() + 2, params.end() });
         return signal;
@@ -54,37 +54,37 @@ namespace Asio
 
     Php::Value Service::run()
     {
-        return boost::numeric_cast<int64_t>(_io_service.run());
+        return boost::numeric_cast<int64_t>(io_service_.run());
     }
 
-    Php::Value Service::runOne()
+    Php::Value Service::run_one()
     {
-        return boost::numeric_cast<int64_t>(_io_service.run_one());
+        return boost::numeric_cast<int64_t>(io_service_.run_one());
     }
 
     Php::Value Service::poll()
     {
-        return boost::numeric_cast<int64_t>(_io_service.poll());
+        return boost::numeric_cast<int64_t>(io_service_.poll());
     }
 
-    Php::Value Service::pollOne()
+    Php::Value Service::poll_one()
     {
-        return boost::numeric_cast<int64_t>(_io_service.poll_one());
+        return boost::numeric_cast<int64_t>(io_service_.poll_one());
     }
 
     void Service::stop()
     {
-        _io_service.stop();
+        io_service_.stop();
     }
 
     void Service::reset()
     {
-        _io_service.reset();
+        io_service_.reset();
     }
 
     Php::Value Service::stopped() const
     {
-        return _io_service.stopped();
+        return io_service_.stopped();
     }
 
     void Service::post(Php::Parameters& params)
@@ -93,7 +93,7 @@ namespace Asio
         if (!callback.isCallable())
             throw Php::Exception("Handler not callable.");
         auto argument = params.size() == 1 ? Php::Value() : params[1];
-        _io_service.post([callback, argument]()
+        io_service_.post([callback, argument]()
         {
             callback(argument);
         });

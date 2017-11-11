@@ -8,16 +8,16 @@
 
 namespace Asio
 {
-    void Signal::_handler(const boost::system::error_code& error, int signal)
+    void Signal::handler(const boost::system::error_code& error, int signal)
     {
-        _callback(this, boost::numeric_cast<int64_t>(signal), _argument, boost::numeric_cast<int64_t>(error.value()));
-        if (!_cancelled)
-            _wait();
+        callback_(this, boost::numeric_cast<int64_t>(signal), argument_, boost::numeric_cast<int64_t>(error.value()));
+        if (!cancelled_)
+            wait();
     }
 
-    void Signal::_wait()
+    void Signal::wait()
     {
-        _signal.async_wait(boost::bind(&Signal::_handler, this,
+        signal_.async_wait(boost::bind(&Signal::handler, this,
             boost::asio::placeholders::error, boost::asio::placeholders::signal_number));
     }
 
@@ -25,10 +25,10 @@ namespace Asio
         boost::asio::io_service& io_service,
         const Php::Value& argument,
         const Php::Value& callback
-    ) : Base(io_service), _signal(io_service), _argument(argument), _callback(callback)
+    ) : Base(io_service), signal_(io_service), argument_(argument), callback_(callback)
     {
-        _wrapper = new Php::Object("Asio\\Signal", this);
-        _wait();
+        wrapper_ = new Php::Object("Asio\\Signal", this);
+        wait();
     }
 
     void Signal::add(Php::Parameters& params)
@@ -45,7 +45,7 @@ namespace Asio
             auto signal = param.numericValue();
             try
             {
-                _signal.add(boost::numeric_cast<int>(signal));
+                signal_.add(boost::numeric_cast<int>(signal));
             }
             catch (boost::system::system_error& error)
             {
@@ -64,7 +64,7 @@ namespace Asio
             auto signal = param.numericValue();
             try
             {
-                _signal.remove(boost::numeric_cast<int>(signal));
+                signal_.remove(boost::numeric_cast<int>(signal));
             }
             catch (boost::system::system_error& error)
             {
@@ -78,7 +78,7 @@ namespace Asio
     {
         try
         {
-            _signal.clear();
+            signal_.clear();
         }
         catch (boost::system::system_error& error)
         {
@@ -88,17 +88,17 @@ namespace Asio
 
     void Signal::cancel()
     {
-        if (_cancelled)
+        if (cancelled_)
             return;
         try
         {
-            _signal.cancel();
+            signal_.cancel();
         }
         catch (boost::system::system_error& error)
         {
             throw Php::Exception(std::string("Failed to cancel signal handler, error code: " + std::to_string(error.code().value())));
         }
-        _cancelled = true;
-        delete _wrapper;
+        cancelled_ = true;
+        delete wrapper_;
     }
 }

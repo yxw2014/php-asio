@@ -8,5 +8,5 @@
 
 namespace Asio
 {
-    Base::Base(boost::asio::io_service& io_service) : _io_service(io_service) {}
+    Base::Base(boost::asio::io_service& io_service) : io_service_(io_service) {}
 }

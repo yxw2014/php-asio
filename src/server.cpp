@@ -8,69 +8,69 @@
 
 namespace Asio
 {
-    template <typename protocol>
-    void Server<protocol>::_accept()
+    template <typename Protocol>
+    void Server<Protocol>::accept(void*)
     {
-        auto socket = new Socket<protocol>(_io_service);
+        auto socket = new Socket<Protocol>(io_service_);
         socket->wrap();
-        _acceptor->async_accept(socket->getSocket(),
+        acceptor_->async_accept(socket->getSocket(),
             boost::bind(&Server::_handler, this, boost::asio::placeholders::error, socket));
     }
 
-    template <typename protocol>
-    void Server<protocol>::_handler(const boost::system::error_code& error, Socket<protocol>* const socket)
+    template <typename Protocol>
+    void Server<Protocol>::_handler(const boost::system::error_code& error, Socket<Protocol>* const socket)
     {
-        _context_flag = true;
-        _callback(this, socket, boost::numeric_cast<int64_t>(error.value()), _argument);
-        _context_flag = false;
-        if (_stopped)
+        context_flag_ = true;
+        callback_(this, socket, boost::numeric_cast<int64_t>(error.value()), argument_);
+        context_flag_ = false;
+        if (stopped_)
         {
             socket->unwrap();
-            delete _wrapper;
+            delete wrapper_;
         }
-        else if (_auto_accept)
-            _accept();
+        else if (auto_accept_)
+            accept();
     }
 
-    template <typename protocol>
-    Server<protocol>::Server(
+    template <typename Protocol>
+    Server<Protocol>::Server(
         boost::asio::io_service& io_service,
         bool auto_accept,
         const Php::Value& argument,
         const Php::Value& callback
-    ) : Base(io_service), _argument(argument), _callback(callback), _auto_accept(auto_accept) {}
+    ) : Base(io_service), argument_(argument), callback_(callback), auto_accept_(auto_accept) {}
 
-    template <typename protocol>
-    Server<protocol>::~Server()
+    template <typename Protocol>
+    Server<Protocol>::~Server()
     {
-        if (_acceptor != nullptr)
+        if (acceptor_ != nullptr)
         {
-            _acceptor->close();
-            delete _acceptor;
+            acceptor_->close();
+            delete acceptor_;
         }
     }
 
     template <>
-    void TcpServer::initAcceptor(const std::string& address, unsigned short port)
+    void TcpServer::init_acceptor(const std::string& address, unsigned short port)
     {
         using boost::asio::ip::tcp;
         try
         {
            tcp::endpoint endpoint(boost::asio::ip::address::from_string(address), port);
-            _acceptor = new tcp::acceptor(_io_service, endpoint);
+            acceptor_ = new tcp::acceptor(io_service_, endpoint);
         }
         catch (boost::system::system_error& error)
         {
-            _acceptor = nullptr;
+            acceptor_ = nullptr;
             throw Php::Exception(std::string("Failed to start TCP server, error code: ") + std::to_string(error.code().value()));
         }
-        _wrapper = new Php::Object("Asio\\TcpServer", this);
-        if (_auto_accept)
-            _accept();
+        wrapper_ = new Php::Object("Asio\\TcpServer", this);
+        if (auto_accept_)
+            accept();
     }
 
     template <>
-    void UnixServer::initAcceptor(const std::string& path)
+    void UnixServer::init_acceptor(const std::string& path)
     {
         using boost::asio::local::stream_protocol;
         try
@@ -78,37 +78,37 @@ namespace Asio
             //Unlink socket file before binding.
             boost::filesystem::remove(path);
             stream_protocol::endpoint endpoint(path);
-            _acceptor = new stream_protocol::acceptor(_io_service, endpoint);
+            acceptor_ = new stream_protocol::acceptor(io_service_, endpoint);
         }
         catch (boost::system::system_error& error)
         {
-            _acceptor = nullptr;
+            acceptor_ = nullptr;
             throw Php::Exception(std::string("Failed to start UNIX server, error code: ") + std::to_string(error.code().value()));
         }
-        _wrapper = new Php::Object("Asio\\UnixServer", this);
-        if (_auto_accept)
-            _accept();
+        wrapper_ = new Php::Object("Asio\\UnixServer", this);
+        if (auto_accept_)
+            accept();
     }
     
-    template <typename protocol>
-    void Server<protocol>::accept(Php::Parameters& params)
+    template <typename Protocol>
+    void Server<Protocol>::accept(Php::Parameters& params)
     {
-        if (_auto_accept)
+        if (auto_accept_)
             throw Php::Exception("Server is working in auto-accept mode.");
         auto param_count = params.size();
         if (param_count)
         {
-            _callback = params[0];
-            _argument = param_count == 1 ? Php::Value() : params[1];
+            callback_ = params[0];
+            argument_ = param_count == 1 ? Php::Value() : params[1];
         }
-        _accept();
+        accept();
     }
 
-    template <typename protocol>
-    void Server<protocol>::stop()
+    template <typename Protocol>
+    void Server<Protocol>::stop()
     {
-        _acceptor->cancel();
-        _stopped = true;
+        acceptor_->cancel();
+        stopped_ = true;
     }
 
     // Instantiation for TcpServer.

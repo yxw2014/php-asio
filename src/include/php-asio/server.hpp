@@ -16,50 +16,52 @@ namespace Asio
      * Wrapper for Boost.Asio stream socket acceptor.
      * Provide TCP services.
      */
-    template<typename protocol>
+    template <typename Protocol>
     class Server : public Base
     {
         /**
          * Acceptor for this server.
          */
-        typename protocol::acceptor* _acceptor;
+        typename Protocol::acceptor* acceptor_;
 
         /**
          * Argument to be passed to acceptor callback.
          */
-        Php::Value _argument;
+        Php::Value argument_;
 
         /**
          * Timer callback.
          */
-        Php::Value _callback;
+        Php::Value callback_;
 
         /**
          * Whether the server start accepting once created.
          */
-        bool _auto_accept;
+        bool auto_accept_;
 
         /**
          * Whether the server is marked as stopped.
          */
-        bool _stopped = false;
+        bool stopped_ = false;
 
         /**
          * Boolean flag for execution context.
          */
-        bool _context_flag = false;
+        bool context_flag_ = false;
 
         /**
          * Async accept.
+         * 
+         * The void* argument is to prevent ambiguous call when adding method.
          */
-        void _accept();
+        void accept(void* = nullptr);
 
         /**
          * Accept handler.
          * @param error : Error code
          * @param socket : Client connection
          */
-        void _handler(const boost::system::error_code& error, Socket<protocol>* const socket);
+        void _handler(const boost::system::error_code& error, Socket<Protocol>* const socket);
 
     public:
         /**
@@ -85,13 +87,13 @@ namespace Asio
          * @param address : Address which the server will bind to.
          * @param port : Port which the server will bind to.
          */
-        void initAcceptor(const std::string& address, unsigned short port);
+        void init_acceptor(const std::string& address, unsigned short port);
 
         /**
          * Init acceptor for local sockets.
          * @param path : Socket path.
          */
-        void initAcceptor(const std::string& path);
+        void init_acceptor(const std::string& path);
 
         /**
          * Accept incoming client connection once.

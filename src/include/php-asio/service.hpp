@@ -20,7 +20,7 @@ namespace Asio
         /**
          * The io_service of all IO objects in current instance
          */
-        boost::asio::io_service _io_service;
+        boost::asio::io_service io_service_;
 
     public:
 
@@ -48,22 +48,22 @@ namespace Asio
          * Add a new timer.
          * @throws Php::Exception : thrown when timer callback is not callable.
          */
-        Php::Value addTimer(Php::Parameters&);
+        Php::Value add_timer(Php::Parameters&);
 
         /**
          * Create a new TCP server and start listening.
          */
-        Php::Value addTcpServer(Php::Parameters&);
+        Php::Value add_tcp_server(Php::Parameters&);
 
         /**
         * Create a new UNIX domain socket server (SOCK_STREAM) and start listening.
         */
-        Php::Value addUnixServer(Php::Parameters&);
+        Php::Value add_unix_server(Php::Parameters&);
 
         /**
          * Add new signal handler.
          */
-        Php::Value addSignal(Php::Parameters&);
+        Php::Value add_signal(Php::Parameters&);
 
         /**
          * Start event-loop in block mode.
@@ -73,7 +73,7 @@ namespace Asio
         /**
          * Excecute at most one handler within the event loop in block mode.
          */
-        Php::Value runOne();
+        Php::Value run_one();
 
         /**
         * Start event loop in non-block mode.
@@ -83,7 +83,7 @@ namespace Asio
         /**
         * Excecute at most one handler within the event loop in non-block mode.
         */
-        Php::Value pollOne();
+        Php::Value poll_one();
 
         /**
          * Cancel all pending handlers within the event loop.

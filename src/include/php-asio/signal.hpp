@@ -16,34 +16,34 @@ namespace Asio
         /**
          * Boost.Asio signal_set instance.
          */
-        boost::asio::signal_set _signal;
+        boost::asio::signal_set signal_;
 
         /**
          * Argument to be passed to signal callback.
          */
-        Php::Value _argument;
+        Php::Value argument_;
 
         /**
          * Signal callback.
          */
-        Php::Value _callback;
+        Php::Value callback_;
 
         /**
          * Whether signal handler is marked as cancelled.
          */
-        bool _cancelled = false;
+        bool cancelled_ = false;
 
         /**
          * Signal handler.
          * @param error : Error code
          * @param signal : Signal number
          */
-        void _handler(const boost::system::error_code& error, int signal);
+        void handler(const boost::system::error_code& error, int signal);
 
         /**
          * Async wait.
          */
-        void _wait();
+        void wait();
 
     public:
         /**

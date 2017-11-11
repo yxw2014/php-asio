@@ -8,31 +8,31 @@
 
 namespace Asio
 {
-    void Timer::_defer()
+    void Timer::defer(void*)
     {
-        _timer.expires_from_now(boost::posix_time::milliseconds(_interval));
-        _timer.async_wait(boost::bind(&Timer::_handler, this, boost::asio::placeholders::error));
+        timer_.expires_from_now(boost::posix_time::milliseconds(interval_));
+        timer_.async_wait(boost::bind(&Timer::handler, this, boost::asio::placeholders::error));
     }
 
-    void Timer::_handler(const boost::system::error_code& error)
+    void Timer::handler(const boost::system::error_code& error)
     {
-        _context_flag = true;
-        _callback(this, _argument, boost::numeric_cast<int64_t>(error.value()));
+        context_flag_ = true;
+        callback_(this, argument_, boost::numeric_cast<int64_t>(error.value()));
         //Errno 125: Operation cancelled.
         if (error.value() == 125)
-            _persistent = false;
-        if (_persistent || !_context_flag)
+            persistent_ = false;
+        if (persistent_ || !context_flag_)
         {
-            _context_flag = false;
-            _defer();
+            context_flag_ = false;
+            defer();
         }
         // Delete this Php::Object when timer stops.
         // Refcount will fall to zero and timer will be destroyed.
         else
         {
-            _context_flag = false;
-            delete _wrapper;
-            _wrapper = nullptr;
+            context_flag_ = false;
+            delete wrapper_;
+            wrapper_ = nullptr;
         }
     }
 
@@ -42,39 +42,39 @@ namespace Asio
         const Php::Value& argument,
         const Php::Value& callback,
         bool persistent
-    ) : Base(io_service), _timer(io_service), _interval(interval), _argument(argument), _callback(callback), _persistent(persistent)
+    ) : Base(io_service), timer_(io_service), interval_(interval), argument_(argument), callback_(callback), persistent_(persistent)
     {
         // Objects instantiated in C++ must be wrapped within a Php::Object to make it accessible by Zend Engine.
         // Store this Php::Object in class property to make sure it stays alive until timer stopped.
         // Otherwise the refcount of wrapped object will fall to zero and object will be destroyed by Zend Engine.
         // The C++ object will also be destroyed by PHP-CPP, which will cause segmentation fault.
-        _wrapper = new Php::Object("Asio\\Timer", this);
-        _defer();
+        wrapper_ = new Php::Object("Asio\\Timer", this);
+        defer();
     }
 
     void Timer::defer(Php::Parameters& params)
     {
-        if (!_context_flag)
+        if (!context_flag_)
             throw Php::Exception("Manual defer is not allowed outside handler callback.");
-        _context_flag = false;
+        context_flag_ = false;
         auto param_count = params.size();
         if (param_count)
         {
-            _interval = params[0];
+            interval_ = params[0];
             if (param_count > 1)
             {
-                _callback = params[1];
-                _argument = param_count == 2 ? Php::Value() : params[2];
+                callback_ = params[1];
+                argument_ = param_count == 2 ? Php::Value() : params[2];
             }
         }
     }
 
     void Timer::cancel()
     {
-        if (_context_flag)
-            _persistent = false;
+        if (context_flag_)
+            persistent_ = false;
         else
-            _timer.cancel();
+            timer_.cancel();
     }
 
 }
