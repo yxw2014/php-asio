@@ -11,13 +11,9 @@
 
 namespace Asio
 {
-    Php::Value Service::add_timer(Php::Parameters& params)
+    Php::Value Service::add_timer()
     {
-        auto callback = params[1];
-        auto param_count = params.size();
-        return new Timer(io_service_, params[0].numericValue(),
-            param_count == 2 ? Php::Value() : params[2], callback,
-            param_count < 4 ? true : params[3].boolValue());
+        return new Timer(io_service_);
     }
 
     Php::Value Service::add_tcp_server(Php::Parameters& params)
@@ -25,31 +21,21 @@ namespace Asio
         auto port = params[1].numericValue();
         if (port < 0 || port > 65535)
             throw Php::Exception("Bad port number.");
-        auto param_count = params.size();
-        auto server = new TcpServer(io_service_, param_count > 2,
-            param_count < 4 ? Php::Value() : params[3],
-            param_count == 2 ? Php::Value() : params[2]);
+        auto server = new TcpServer(io_service_);
         server->init_acceptor(params[0].stringValue(), boost::numeric_cast<unsigned short>(port));
         return server;
     }
 
     Php::Value Service::add_unix_server(Php::Parameters& params)
     {
-        auto param_count = params.size();
-        auto server = new UnixServer(io_service_, param_count > 1,
-            param_count < 3 ? Php::Value() : params[2],
-            param_count == 1 ? Php::Value() : params[1]);
+        auto server = new UnixServer(io_service_);
         server->init_acceptor(params[0].stringValue());
         return server;
     }
 
-    Php::Value Service::add_signal(Php::Parameters& params)
+    Php::Value Service::add_signal()
     {
-        auto param_count = params.size();
-        auto signal = new Signal(io_service_, param_count == 1 ? Php::Value() : params[1], params[0]);
-        if (param_count > 2)
-            signal->add({ params.begin() + 2, params.end() });
-        return signal;
+        return new Signal(io_service_);
     }
 
     Php::Value Service::run()
@@ -99,4 +85,10 @@ namespace Asio
         });
     }
 
+    Php::Value Service::get_last_error()
+    {
+        return last_error_;
+    }
+
+    thread_local int64_t Service::last_error_ = 0;
 }

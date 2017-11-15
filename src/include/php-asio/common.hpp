@@ -11,3 +11,8 @@
 #include <boost/bind.hpp>
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
+
+#define PHP_ASIO_ASYNC_HANDLER_NOARG std::function<void(const boost::system::error_code&)>( \
+    boost::bind(&Future::resolve, future, boost::asio::placeholders::error, 0U))
+#define PHP_ASIO_ASYNC_HANDLER(arg) std::function<void(const boost::system::error_code&, unsigned)>( \
+    boost::bind(&Future::resolve, future, boost::asio::placeholders::error, arg))

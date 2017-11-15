@@ -9,6 +9,7 @@
 #include "common.hpp"
 #include "base.hpp"
 #include "socket.hpp"
+#include "future.hpp"
 
 namespace Asio
 {
@@ -35,11 +36,6 @@ namespace Asio
         Php::Value callback_;
 
         /**
-         * Whether the server start accepting once created.
-         */
-        bool auto_accept_;
-
-        /**
          * Whether the server is marked as stopped.
          */
         bool stopped_ = false;
@@ -51,31 +47,23 @@ namespace Asio
 
         /**
          * Async accept.
-         * 
-         * The void* argument is to prevent ambiguous call when adding method.
          */
-        void accept(void* = nullptr);
+        Future* accept();
 
         /**
          * Accept handler.
          * @param error : Error code
-         * @param socket : Client connection
+         * @param socket : Socket of accepted connection
          */
-        void _handler(const boost::system::error_code& error, Socket<Protocol>* const socket);
+        Php::Value handler(const boost::system::error_code& error, Socket<Protocol>* const socket);
 
     public:
         /**
          * Constructor.
          * @param io_service : IO service for current TCP server.
-         * @param auto_accept : Whether to start accepting once server is created.
-         * @param argument : Extra argument to be passed to acceptor callback.
-         * @param callback : Acceptor callback.
          */
         explicit Server(
-            boost::asio::io_service& io_service,
-            bool auto_accept,
-            const Php::Value& argument,
-            const Php::Value& callback);
+            boost::asio::io_service& io_service);
 
         /**
          * Destructor.
@@ -98,7 +86,7 @@ namespace Asio
         /**
          * Accept incoming client connection once.
          */
-        void accept(Php::Parameters&);
+        Php::Value accept(Php::Parameters&);
 
         /**
          * Stop server.

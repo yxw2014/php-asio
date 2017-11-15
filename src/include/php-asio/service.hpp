@@ -7,6 +7,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "future.hpp"
 
 namespace Asio
 {
@@ -21,6 +22,11 @@ namespace Asio
          * The io_service of all IO objects in current instance
          */
         boost::asio::io_service io_service_;
+
+        /**
+         * Last error code emitted by yielded async operations of this thread.
+         */
+        static thread_local int64_t last_error_;
 
     public:
 
@@ -46,27 +52,26 @@ namespace Asio
 
         /**
          * Add a new timer.
-         * @throws Php::Exception : thrown when timer callback is not callable.
          */
-        Php::Value add_timer(Php::Parameters&);
+        Php::Value add_timer();
 
         /**
-         * Create a new TCP server and start listening.
+         * Create a new TCP server.
          */
         Php::Value add_tcp_server(Php::Parameters&);
 
         /**
-        * Create a new UNIX domain socket server (SOCK_STREAM) and start listening.
+        * Create a new UNIX domain socket server (SOCK_STREAM).
         */
         Php::Value add_unix_server(Php::Parameters&);
 
         /**
          * Add new signal handler.
          */
-        Php::Value add_signal(Php::Parameters&);
+        Php::Value add_signal();
 
         /**
-         * Start event-loop in block mode.
+         * Start event loop in block mode.
          */
         Php::Value run();
 
@@ -104,6 +109,26 @@ namespace Asio
          * Execute a given callback with argument at the next tick.
          */
         void post(Php::Parameters&);
+
+        /**
+         * Get io_service by reference.
+         * 
+         * Can be used when working on another extension based on Boost.Asio.
+         */
+        boost::asio::io_service& get_io_service()
+        {
+            return io_service_;
+        }
+
+        /**
+         * Get last error code.
+         */
+        static Php::Value get_last_error();
+
+        /**
+         * Last error is set by Future resolver.
+         */
+        friend void Future::resolve(const boost::system::error_code&, unsigned);
 
     };
 }

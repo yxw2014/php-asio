@@ -9,36 +9,32 @@
 namespace Asio
 {
     template <typename Protocol>
-    void Server<Protocol>::accept(void*)
+    Future* Server<Protocol>::accept()
     {
         auto socket = new Socket<Protocol>(io_service_);
         socket->wrap();
-        acceptor_->async_accept(socket->getSocket(),
-            boost::bind(&Server::_handler, this, boost::asio::placeholders::error, socket));
+        auto future = new Future(boost::bind(&Server::handler, this, _1, socket));
+        acceptor_->async_accept(socket->getSocket(), PHP_ASIO_ASYNC_HANDLER_NOARG);
+        return future;
     }
 
     template <typename Protocol>
-    void Server<Protocol>::_handler(const boost::system::error_code& error, Socket<Protocol>* const socket)
+    Php::Value Server<Protocol>::handler(const boost::system::error_code& error, Socket<Protocol>* const socket)
     {
         context_flag_ = true;
-        callback_(this, socket, boost::numeric_cast<int64_t>(error.value()), argument_);
+        if (callback_.isCallable())
+            Future::coroutine(callback_(this, socket, boost::numeric_cast<int64_t>(error.value()), argument_));
         context_flag_ = false;
         if (stopped_)
         {
             socket->unwrap();
             delete wrapper_;
         }
-        else if (auto_accept_)
-            accept();
+        return socket;
     }
 
     template <typename Protocol>
-    Server<Protocol>::Server(
-        boost::asio::io_service& io_service,
-        bool auto_accept,
-        const Php::Value& argument,
-        const Php::Value& callback
-    ) : Base(io_service), argument_(argument), callback_(callback), auto_accept_(auto_accept) {}
+    Server<Protocol>::Server(boost::asio::io_service& io_service) : Base(io_service) {}
 
     template <typename Protocol>
     Server<Protocol>::~Server()
@@ -61,8 +57,6 @@ namespace Asio
             throw Php::Exception(std::string("Failed to start TCP server, error code: ") + std::to_string(error.code().value()));
         }
         wrapper_ = new Php::Object("Asio\\TcpServer", this);
-        if (auto_accept_)
-            accept();
     }
 
     template <>
@@ -83,24 +77,17 @@ namespace Asio
             throw Php::Exception(std::string("Failed to start UNIX server, error code: ") + std::to_string(error.code().value()));
         }
         wrapper_ = new Php::Object("Asio\\UnixServer", this);
-        if (auto_accept_)
-            accept();
     }
     
     template <typename Protocol>
-    void Server<Protocol>::accept(Php::Parameters& params)
+    Php::Value Server<Protocol>::accept(Php::Parameters& params)
     {
         if (stopped_)
-            return;
-        if (auto_accept_)
-            throw Php::Exception("Server is working in auto-accept mode.");
+            throw Php::Exception("Trying to accept connection on a stopped server.");
         auto param_count = params.size();
-        if (param_count)
-        {
-            callback_ = params[0];
-            argument_ = param_count == 1 ? Php::Value() : params[1];
-        }
-        accept();
+        callback_ = param_count ? params[0] : Php::Value();
+        argument_ = param_count > 1 ? params[1] : Php::Value();
+        return accept();
     }
 
     template <typename Protocol>

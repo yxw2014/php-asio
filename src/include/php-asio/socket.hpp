@@ -8,6 +8,7 @@
 
 #include "common.hpp"
 #include "base.hpp"
+#include "future.hpp"
 
 namespace Asio
 {
@@ -35,7 +36,7 @@ namespace Asio
          * @param argument : Extra argument
          * @param buffer : Read buffer
          */
-        void read_handler(
+        Php::Value read_handler(
             const boost::system::error_code& error,
             size_t length,
             const Php::Value& callback,
@@ -50,7 +51,7 @@ namespace Asio
          * @param argument : Extra argument
          * @param buffer : Write buffer
          */
-        void write_handler(
+        Php::Value write_handler(
             const boost::system::error_code& error,
             size_t length,
             const Php::Value& callback,
@@ -66,7 +67,7 @@ namespace Asio
          */
         template<typename P = Protocol, typename = typename std::enable_if<
             std::is_same<boost::asio::basic_stream_socket<P>, typename P::socket>::value>::type>
-        void read(int64_t length, bool read_some, const Php::Value& callback, const Php::Value& argument);
+        Future* read(int64_t length, bool read_some, const Php::Value& callback, const Php::Value& argument);
 
         /**
          * The internal write method.
@@ -77,7 +78,7 @@ namespace Asio
          */
         template<typename P = Protocol, typename = typename std::enable_if<
             std::is_same<boost::asio::basic_stream_socket<P>, typename P::socket>::value>::type>
-        void write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument);
+        Future* write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument);
 
     public:
         /**
@@ -111,14 +112,14 @@ namespace Asio
          */
         template<typename P = Protocol, typename = typename std::enable_if<
             std::is_same<boost::asio::basic_stream_socket<P>, typename P::socket>::value>::type>
-        void read(Php::Parameters&);
+        Php::Value read(Php::Parameters&);
 
         /**
          * Write asynchronously to stream socket.
          */
         template<typename P = Protocol, typename = typename std::enable_if<
             std::is_same<boost::asio::basic_stream_socket<P>, typename P::socket>::value>::type>
-        void write(Php::Parameters&);
+        Php::Value write(Php::Parameters&);
 
         /**
          * Determine the number of bytes available for reading.

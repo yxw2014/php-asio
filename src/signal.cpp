@@ -8,97 +8,89 @@
 
 namespace Asio
 {
-    void Signal::handler(const boost::system::error_code& error, int signal)
+    Php::Value Signal::handler(const boost::system::error_code& error, int signal)
     {
-        callback_(this, boost::numeric_cast<int64_t>(signal), argument_, boost::numeric_cast<int64_t>(error.value()));
-        if (!cancelled_)
-            wait();
+        auto sig_num = boost::numeric_cast<int64_t>(signal);
+        if (callback_.isCallable())
+            Future::coroutine(callback_(this, sig_num, argument_, boost::numeric_cast<int64_t>(error.value())));
+        return sig_num;
     }
 
-    void Signal::wait()
+    Future* Signal::wait()
     {
-        signal_.async_wait(boost::bind(&Signal::handler, this,
-            boost::asio::placeholders::error, boost::asio::placeholders::signal_number));
+        auto future = new Future(boost::bind(&Signal::handler, this, _1, _2));
+        signal_.async_wait(PHP_ASIO_ASYNC_HANDLER(boost::asio::placeholders::signal_number));
+        return future;
     }
 
-    Signal::Signal(
-        boost::asio::io_service& io_service,
-        const Php::Value& argument,
-        const Php::Value& callback
-    ) : Base(io_service), signal_(io_service), argument_(argument), callback_(callback)
+    Signal::Signal(boost::asio::io_service& io_service) : Base(io_service), signal_(io_service)
     {
         wrapper_ = new Php::Object("Asio\\Signal", this);
-        wait();
     }
 
-    void Signal::add(Php::Parameters& params)
+    Php::Value Signal::add(Php::Parameters& params)
     {
-        add({ params.begin(), params.end() });
+        if (cancelled_)
+            throw Php::Exception("Trying to add signal to a cancelled signal set.");
+        return add({ params.begin(), params.end() });
     }
 
-    void Signal::add(const std::vector<Php::Value>&& signals)
+    int64_t Signal::add(const std::vector<Php::Value>&& signals)
     {
+        boost::system::error_code ec;
         for (const auto& param : signals)
         {
             if (!param.isNumeric())
                 throw Php::Exception("Integer value expected.");
             auto signal = param.numericValue();
-            try
-            {
-                signal_.add(boost::numeric_cast<int>(signal));
-            }
-            catch (boost::system::system_error& error)
-            {
-                throw Php::Exception(std::string("Failed to add signal ")
-                    + std::to_string(signal) + ", error code: " + std::to_string(error.code().value()));
-            }
+            signal_.add(boost::numeric_cast<int>(signal), ec);
+            if (ec) break;
         }
+        return boost::numeric_cast<int64_t>(ec.value());
     }
 
-    void Signal::remove(Php::Parameters& params)
+    Php::Value Signal::remove(Php::Parameters& params)
     {
-        for (auto param : params)
+        if (cancelled_)
+            throw Php::Exception("Trying to remove signal on a cancelled signal set.");
+        boost::system::error_code ec;
+        for (const auto& param : params)
         {
             if (!param.isNumeric())
                 throw Php::Exception("Integer value expected.");
             auto signal = param.numericValue();
-            try
-            {
-                signal_.remove(boost::numeric_cast<int>(signal));
-            }
-            catch (boost::system::system_error& error)
-            {
-                throw Php::Exception(std::string("Failed to remove signal ")
-                    + std::to_string(signal) + ", error code: " + std::to_string(error.code().value()));
-            }
+            signal_.remove(boost::numeric_cast<int>(signal));
+            if (ec) break;
         }
+        return boost::numeric_cast<int64_t>(ec.value());
     }
 
-    void Signal::clear()
-    {
-        try
-        {
-            signal_.clear();
-        }
-        catch (boost::system::system_error& error)
-        {
-            throw Php::Exception(std::string("Failed to clear signals, error code: " + std::to_string(error.code().value())));
-        }
-    }
-
-    void Signal::cancel()
+    Php::Value Signal::wait(Php::Parameters& params)
     {
         if (cancelled_)
-            return;
-        try
-        {
-            signal_.cancel();
-        }
-        catch (boost::system::system_error& error)
-        {
-            throw Php::Exception(std::string("Failed to cancel signal handler, error code: " + std::to_string(error.code().value())));
-        }
-        cancelled_ = true;
+            throw Php::Exception("Trying to wait for a cancelled signal set.");
+        auto param_count = params.size();
+        callback_ = param_count ? params[0] : Php::Value();
+        argument_ = param_count > 1 ? params[1] : Php::Value();
+        return wait();
+    }
+
+    Php::Value Signal::clear()
+    {
+        if (cancelled_)
+            throw Php::Exception("Trying to clear a cancelled signal set.");
+        boost::system::error_code ec;
+        signal_.clear(ec);
+        return boost::numeric_cast<int64_t>(ec.value());
+    }
+
+    Php::Value Signal::cancel()
+    {
+        if (cancelled_)
+            throw Php::Exception("Trying to cancel a cancelled signal set.");
+        boost::system::error_code ec;
+        signal_.cancel(ec);
         delete wrapper_;
+        return boost::numeric_cast<int64_t>(ec.value());
     }
 }

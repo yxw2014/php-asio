@@ -6,16 +6,24 @@
  */
 
 $service = new Asio\Service();
-$timer = $service->addTimer(1000, function (Asio\Timer $timer, $arg, $ec) use ($service) {
-    //Operation cancelled.
-    if ($ec == 125)
+$service->addTimer()->wait(1000, function (Asio\Timer $timer, $arg, $ec) use ($service) {
+    if ($ec)
         return;
-    static $counter = 0;
-    $service->post(function () {
-        echo 'Wait for one second...', PHP_EOL;
-    });
-    echo $arg, PHP_EOL;
-    if (++$counter >= 5)
-        $timer->cancel();
+    $counter = 0;
+    while (1) {
+        $service->post(function () {
+            echo 'Wait for one second...', PHP_EOL;
+        });
+        echo $arg, PHP_EOL;
+        if (++$counter >= 5) {
+            $timer->cancel();
+            return;
+        } else {
+            //Using coroutine.
+            yield $timer->wait(1000);
+            if (\Asio\Service::lastError())
+                return;
+        }
+    }
 }, 'Tick.');
 $service->run();

@@ -28,13 +28,15 @@ extern "C" PHPCPP_EXPORT void* get_module()
     //Interface Asio\StreamSocket.
     Php::Interface stream_socket("Asio\\StreamSocket");
     stream_socket.extends(socket);
-    stream_socket.method("read", {
+    stream_socket.method("read",
+    {
         Php::ByVal("length", Php::Type::Numeric),
         Php::ByVal("read_some", Php::Type::Bool),
         Php::ByVal("callback", Php::Type::Callable),
         Php::ByVal("argument", Php::Type::Null, false),
     });
-    stream_socket.method("write", {
+    stream_socket.method("write",
+    {
         Php::ByVal("data", Php::Type::String),
         Php::ByVal("write_some", Php::Type::Bool),
         Php::ByVal("callback", Php::Type::Callable, false),
@@ -44,7 +46,8 @@ extern "C" PHPCPP_EXPORT void* get_module()
 
     //Interface Asio\Server.
     Php::Interface server("Asio\\Server");
-    server.method("accept", {
+    server.method("accept",
+    {
         Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false)
     });
@@ -53,27 +56,17 @@ extern "C" PHPCPP_EXPORT void* get_module()
 
     //Class Asio\Service.
     Php::Class<Service> service("Asio\\Service");
-    service.method<&Service::add_timer>("addTimer", {
-        Php::ByVal("interval", Php::Type::Numeric),
-        Php::ByVal("callback", Php::Type::Callable),
-        Php::ByVal("argument", Php::Type::Null, false),
-        Php::ByVal("persistent", Php::Type::Bool, false)
-    });
-    service.method<&Service::add_tcp_server>("addTcpServer", {
+    service.method<&Service::add_timer>("addTimer");
+    service.method<&Service::add_tcp_server>("addTcpServer",
+    {
         Php::ByVal("address", Php::Type::String),
         Php::ByVal("port", Php::Type::Numeric),
-        Php::ByVal("callback", Php::Type::Callable, false),
-        Php::ByVal("argument", Php::Type::Null, false),
     });
-    service.method<&Service::add_unix_server>("addUnixServer", {
+    service.method<&Service::add_unix_server>("addUnixServer",
+    {
         Php::ByVal("path", Php::Type::String),
-        Php::ByVal("callback", Php::Type::Callable, false),
-        Php::ByVal("argument", Php::Type::Null, false),
     });
-    service.method<&Service::add_signal>("addSignal", {
-        Php::ByVal("callback", Php::Type::Callable),
-        Php::ByVal("argument", Php::Type::Null, false),
-    });
+    service.method<&Service::add_signal>("addSignal");
     service.method<&Service::run>("run");
     service.method<&Service::run_one>("runOne");
     service.method<&Service::poll>("poll");
@@ -81,16 +74,23 @@ extern "C" PHPCPP_EXPORT void* get_module()
     service.method<&Service::stop>("stop");
     service.method<&Service::stopped>("stopped");
     service.method<&Service::reset>("reset");
-    service.method<&Service::post>("post", {
+    service.method<&Service::post>("post",
+    {
         Php::ByVal("callback", Php::Type::Callable),
         Php::ByVal("argument", Php::Type::Null, false)
     });
+    service.method<&Service::get_last_error>("lastError");
     asio.add(std::move(service));
+
+    //Class Asio\Future.
+    Php::Class<Future> future("Asio\\Future", Php::Final);
+    asio.add(std::move(future));
 
     //Class Asio\Timer.
     Php::Class<Timer> timer("Asio\\Timer", Php::Final);
-    timer.method<&Timer::defer>("defer", {
-        Php::ByVal("interval", Php::Type::Numeric, false),
+    timer.method<&Timer::wait>("wait",
+    {
+        Php::ByVal("interval", Php::Type::Numeric),
         Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false)
     });
@@ -100,7 +100,8 @@ extern "C" PHPCPP_EXPORT void* get_module()
     //Class Asio\TcpServer.
     Php::Class<TcpServer> tcp_server("Asio\\TcpServer", Php::Final);
     tcp_server.implements(server);
-    tcp_server.method<&TcpServer::accept>("accept", {
+    tcp_server.method<&TcpServer::accept>("accept",
+    {
         Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false)
     });
@@ -110,7 +111,8 @@ extern "C" PHPCPP_EXPORT void* get_module()
     //Class Asio\UnixServer.
     Php::Class<UnixServer> unix_server("Asio\\UnixServer", Php::Final);
     unix_server.implements(server);
-    unix_server.method<&UnixServer::accept>("accept", {
+    unix_server.method<&UnixServer::accept>("accept",
+    {
         Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false)
     });
@@ -120,13 +122,15 @@ extern "C" PHPCPP_EXPORT void* get_module()
     //Class Asio\TcpSocket.
     Php::Class<TcpSocket> tcp_socket("Asio\\TcpSocket", Php::Final);
     tcp_socket.implements(stream_socket);
-    tcp_socket.method<&TcpSocket::read>("read", {
+    tcp_socket.method<&TcpSocket::read>("read",
+    {
         Php::ByVal("length", Php::Type::Numeric),
         Php::ByVal("read_some", Php::Type::Bool),
-        Php::ByVal("callback", Php::Type::Callable),
+        Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false),
     });
-    tcp_socket.method<&TcpSocket::write>("write", {
+    tcp_socket.method<&TcpSocket::write>("write",
+    {
         Php::ByVal("data", Php::Type::String),
         Php::ByVal("write_some", Php::Type::Bool),
         Php::ByVal("callback", Php::Type::Callable, false),
@@ -140,13 +144,15 @@ extern "C" PHPCPP_EXPORT void* get_module()
     //Class Asio\UnixSocket.
     Php::Class<UnixSocket> unix_socket("Asio\\UnixSocket", Php::Final);
     unix_socket.implements(stream_socket);
-    unix_socket.method<&UnixSocket::read>("read", {
+    unix_socket.method<&UnixSocket::read>("read",
+    {
         Php::ByVal("length", Php::Type::Numeric),
         Php::ByVal("read_some", Php::Type::Bool),
         Php::ByVal("callback", Php::Type::Callable),
         Php::ByVal("argument", Php::Type::Null, false),
     });
-    unix_socket.method<&UnixSocket::write>("write", {
+    unix_socket.method<&UnixSocket::write>("write",
+    {
         Php::ByVal("data", Php::Type::String),
         Php::ByVal("write_some", Php::Type::Bool),
         Php::ByVal("callback", Php::Type::Callable, false),
@@ -160,6 +166,11 @@ extern "C" PHPCPP_EXPORT void* get_module()
     //Class Asio\Signal.
     Php::Class<Signal> signal("Asio\\Signal", Php::Final);
     signal.method<&Signal::add>("add");
+    signal.method<&Signal::wait>("wait",
+    {
+        Php::ByVal("callback", Php::Type::Callable, false),
+        Php::ByVal("argument", Php::Type::Null, false)
+    });
     signal.method<&Signal::remove>("remove");
     signal.method<&Signal::clear>("clear");
     signal.method<&Signal::cancel>("cancel");

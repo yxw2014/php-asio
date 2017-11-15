@@ -8,6 +8,7 @@
 
 #include "common.hpp"
 #include "base.hpp"
+#include "future.hpp"
 
 namespace Asio
 {
@@ -38,25 +39,24 @@ namespace Asio
          * @param error : Error code
          * @param signal : Signal number
          */
-        void handler(const boost::system::error_code& error, int signal);
+        Php::Value handler(const boost::system::error_code& error, int signal);
 
         /**
          * Async wait.
          */
-        void wait();
+        Future* wait();
+
+        /**
+         * Internal method for adding signals.
+         */
+        int64_t add(const std::vector<Php::Value>&& signals);
 
     public:
         /**
          * Constructor.
          * @param io_service : IO service for current signal handler
-         * @param argument : Argument to be passed to signal callback
-         * @param callback : Signal callback
          */
-        explicit Signal(
-            boost::asio::io_service& io_service,
-            const Php::Value& argument,
-            const Php::Value& callback
-        );
+        explicit Signal(boost::asio::io_service& io_service);
 
         /**
          * Destructor.
@@ -66,27 +66,27 @@ namespace Asio
         /**
          * Add signals.
          */
-        void add(Php::Parameters&);
-
-        /**
-         * Internal method for adding signals.
-         */
-        void add(const std::vector<Php::Value>&& signals);
+        Php::Value add(Php::Parameters&);
 
         /**
          * Remove signals.
          */
-        void remove(Php::Parameters&);
+        Php::Value remove(Php::Parameters&);
+
+        /**
+         * Wait for a signal.
+         */
+        Php::Value wait(Php::Parameters&);
 
         /**
          * Remove all signals.
          */
-        void clear();
+        Php::Value clear();
 
         /**
          * Cancel current signal handler.
          */
-        void cancel();
+        Php::Value cancel();
 
     };
 }

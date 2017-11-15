@@ -17,49 +17,38 @@ namespace Asio;
 class Service {
 
     /**
-     * Add Timer and start deferring.
+     * Add Timer.
      *
-     * @param int $interval : milliseconds
-     * @param callable $callback : Timer callback
-     * @param mixed $argument : Extra argument
-     * @param bool $persistent
      * @return Timer
      */
-    function addTimer(int $interval, callable $callback, $argument = null, bool $persistent = true) {}
+    function addTimer() {}
 
     /**
      * Add TCP server.
      *
      * @param string $address : Local IP address. IPv4(e.g. '0.0.0.0') and IPv6(e.g. '::') supported.
      * @param int $port : Local port to bind to.
-     * @param callable $callback[optional] : Acceptor callback
-     * @param mixed $argument
      * @throws \Exception
-     * @return TcpSocket
+     * @return TcpServer
      */
-    function addTcpServer(string $address, int $port, callable $callback, $argument = null) {}
+    function addTcpServer(string $address, int $port) {}
 
     /**
      * Add UNIX stream socket server.
      *
      * @param string $path : Path to socket file.
-     * @param callable $callback[optional] : Acceptor callback
-     * @param null $argument
      * @throws \Exception
      * @return UnixServer
      */
-    function addUnixServer(string $path, callable $callback, $argument = null) {}
+    function addUnixServer(string $path) {}
 
     /**
      * Add signal handler.
      *
-     * @param callable $callback
-     * @param mixed $argument
-     * @param int[] ...$signals[optional]
      * @throws \Exception
      * @return Signal
      */
-    function addSignal(callable $callback, $argument = null, int... $signals) {}
+    function addSignal() {}
 
     /**
      * Run event loop(blocked).
@@ -97,6 +86,27 @@ class Service {
      * @return int : the number of handlers executed
      */
     function post(callable $callback, $argument = null) {}
+
+    /**
+     * Get last error code emitted by yielded async operations of this thread.
+     *
+     * @return int
+     */
+    static function lastError() {}
+}
+
+/**
+ * Returned by asynchronous operations, and resolves upon operation completion.
+ * If yielded, future resolution will also resume the generator.
+ *
+ * @package Asio
+ */
+final class Future {
+
+    /**
+     * This class can only be instantiated by asynchronous operations.
+     */
+    private function __construct() {}
 }
 
 /**
@@ -116,19 +126,17 @@ final class Timer {
      * Defer the timer once.
      * Do not pass arguments and the original ones will be preserved.
      *
-     * This method only work for timers with "persistent == false".
-     * And it cannot be called outside timer callback.
-     *
-     * @param int $interval[optional]
+     * @param int $interval : Milliseconds
      * @param callable $callback[optional]
      * @param mixed $argument
      * @throws \Exception
+     * @return Future : Resolves null
      */
-    function defer(int $interval, callable $callback, $argument = null) {}
+    function wait(int $interval, callable $callback, $argument = null) {}
 
     /**
-     * Set timer's persistent attribute to false.
-     * If this method is called outside timer callback, the callback will still be called once.
+     * Cancel the timer.
+     * All async operations will resolve immediately with error.
      */
     function cancel() {}
 }
@@ -156,6 +164,8 @@ interface Socket {
 
     /**
      * Close socket.
+     *
+     * @return void
      */
     function close();
 }
@@ -172,9 +182,10 @@ interface StreamSocket extends Socket {
      *
      * @param int $length : Max number of bytes to be read
      * @param bool $read_some
-     * @param callable $callback : Read handler callback
+     * @param callable $callback[optional] : Read handler callback
      * @param mixed $argument
      * @throws \Exception
+     * @return Future : Resolves received data(string)
      */
     function read(int $length, bool $read_some, callable $callback, $argument = null);
 
@@ -186,6 +197,7 @@ interface StreamSocket extends Socket {
      * @param callable $callback[optional] : Write handler callback
      * @param mixed $argument
      * @throws \Exception
+     * @return Future : Resolves bytes transferred(int)
      */
     function write(string $data, bool $write_some, callable $callback = null, $argument = null);
 }
@@ -200,14 +212,17 @@ interface Server {
     /**
      * Accept incoming client connection once.
      *
-     * @param callable $callback : Acceptor callback
+     * @param callable $callback[optional] : Acceptor callback
      * @param mixed $argument
      * @throws \Exception
+     * @return Future : Resolves Socket.
      */
     function accept(callable $callback, $argument = null);
 
     /**
      * Stop server and cancel all async operations related to it.
+     *
+     * @return void
      */
     function stop();
 }
@@ -227,7 +242,7 @@ final class TcpServer implements Server {
     /**
      * {@inheritdoc}
      */
-    function accept(callable $callback, $argument = null) {}
+    function accept(callable $callback = null, $argument = null) {}
 
     /**
      * {@inheritdoc}
@@ -250,7 +265,7 @@ final class UnixServer implements Server {
     /**
      * {@inheritdoc}
      */
-    function accept(callable $callback, $argument = null) {}
+    function accept(callable $callback = null, $argument = null) {}
 
     /**
      * {@inheritdoc}
@@ -273,7 +288,7 @@ final class TcpSocket implements StreamSocket {
     /**
      * {@inheritdoc}
      */
-    function read(int $length, bool $read_some, callable $callback, $argument = null) {}
+    function read(int $length, bool $read_some, callable $callback = null, $argument = null) {}
 
     /**
      * {@inheritdoc}
@@ -311,7 +326,7 @@ final class UnixSocket implements StreamSocket {
     /**
      * {@inheritdoc}
      */
-    function read(int $length, bool $read_some, callable $callback, $argument = null) {}
+    function read(int $length, bool $read_some, callable $callback = null, $argument = null) {}
 
     /**
      * {@inheritdoc}
@@ -350,14 +365,24 @@ final class Signal {
      *
      * @param int[] ...$signals[optional]
      * @throws \Exception
+     * @return int : Error code
      */
     function add(int... $signals) {}
+
+    /**
+     * Wait for a signal.
+     *
+     * @param callable $callback[optional]
+     * @param mixed $argument
+     */
+    function wait(callable $callback, $argument = null) {}
 
     /**
      * Remove signals.
      *
      * @param int[] ...$signals[optional]
      * @throws \Exception
+     * @return int : Error code
      */
     function remove(int... $signals) {}
 
@@ -365,6 +390,7 @@ final class Signal {
      * Remove all signals.
      *
      * @throws \Exception
+     * @return int : Error code
      */
     function clear() {}
 
@@ -372,6 +398,7 @@ final class Signal {
      * Cancel signal handler.
      *
      * @throws \Exception
+     * @return int : Error code
      */
     function cancel() {}
 }
