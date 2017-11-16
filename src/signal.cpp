@@ -10,9 +10,9 @@ namespace Asio
 {
     Php::Value Signal::handler(const boost::system::error_code& error, int signal)
     {
-        auto sig_num = boost::numeric_cast<int64_t>(signal);
+        auto sig_num = static_cast<int64_t>(signal);
         if (callback_.isCallable())
-            Future::coroutine(callback_(this, sig_num, argument_, boost::numeric_cast<int64_t>(error.value())));
+            Future::coroutine(callback_(this, sig_num, argument_, static_cast<int64_t>(error.value())));
         return sig_num;
     }
 
@@ -43,10 +43,10 @@ namespace Asio
             if (!param.isNumeric())
                 throw Php::Exception("Integer value expected.");
             auto signal = param.numericValue();
-            signal_.add(boost::numeric_cast<int>(signal), ec);
+            signal_.add(static_cast<int>(signal), ec);
             if (ec) break;
         }
-        return boost::numeric_cast<int64_t>(ec.value());
+        return static_cast<int64_t>(ec.value());
     }
 
     Php::Value Signal::remove(Php::Parameters& params)
@@ -59,10 +59,10 @@ namespace Asio
             if (!param.isNumeric())
                 throw Php::Exception("Integer value expected.");
             auto signal = param.numericValue();
-            signal_.remove(boost::numeric_cast<int>(signal));
+            signal_.remove(static_cast<int>(signal));
             if (ec) break;
         }
-        return boost::numeric_cast<int64_t>(ec.value());
+        return static_cast<int64_t>(ec.value());
     }
 
     Php::Value Signal::wait(Php::Parameters& params)
@@ -81,7 +81,7 @@ namespace Asio
             throw Php::Exception("Trying to clear a cancelled signal set.");
         boost::system::error_code ec;
         signal_.clear(ec);
-        return boost::numeric_cast<int64_t>(ec.value());
+        return static_cast<int64_t>(ec.value());
     }
 
     Php::Value Signal::cancel()
@@ -91,6 +91,6 @@ namespace Asio
         boost::system::error_code ec;
         signal_.cancel(ec);
         delete wrapper_;
-        return boost::numeric_cast<int64_t>(ec.value());
+        return static_cast<int64_t>(ec.value());
     }
 }

@@ -5,7 +5,7 @@
  * @author CismonX<admin@cismon.net>
  */
 
-$read_cb = function (Asio\StreamSocket $socket, $data, $length, $ec, $arg) use (&$read_cb) {
+$read_cb = function (Asio\StreamSocket $socket, $data, $length, $ec, $arg) {
     if ($ec) {
         $socket->close();
         return;
@@ -22,7 +22,7 @@ $read_cb = function (Asio\StreamSocket $socket, $data, $length, $ec, $arg) use (
         }
     }
 };
-$acceptor_cb = function (Asio\Server $server, Asio\StreamSocket $socket, $ec, $arg) use ($read_cb, &$acceptor_cb) {
+$acceptor_cb = function (Asio\Server $server, Asio\StreamSocket $socket, $ec, $arg) use ($read_cb) {
     if ($ec) {
         $server->stop();
         return;

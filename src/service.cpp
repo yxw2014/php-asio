@@ -22,7 +22,7 @@ namespace Asio
         if (port < 0 || port > 65535)
             throw Php::Exception("Bad port number.");
         auto server = new TcpServer(io_service_);
-        server->init_acceptor(params[0].stringValue(), boost::numeric_cast<unsigned short>(port));
+        server->init_acceptor(params[0].stringValue(), static_cast<unsigned short>(port));
         return server;
     }
 
@@ -40,22 +40,22 @@ namespace Asio
 
     Php::Value Service::run()
     {
-        return boost::numeric_cast<int64_t>(io_service_.run());
+        return static_cast<int64_t>(io_service_.run());
     }
 
     Php::Value Service::run_one()
     {
-        return boost::numeric_cast<int64_t>(io_service_.run_one());
+        return static_cast<int64_t>(io_service_.run_one());
     }
 
     Php::Value Service::poll()
     {
-        return boost::numeric_cast<int64_t>(io_service_.poll());
+        return static_cast<int64_t>(io_service_.poll());
     }
 
     Php::Value Service::poll_one()
     {
-        return boost::numeric_cast<int64_t>(io_service_.poll_one());
+        return static_cast<int64_t>(io_service_.poll_one());
     }
 
     void Service::stop()
@@ -81,7 +81,7 @@ namespace Asio
         auto argument = params.size() == 1 ? Php::Value() : params[1];
         io_service_.post([callback, argument]()
         {
-            callback(argument);
+            Future::coroutine(callback(argument));
         });
     }
 

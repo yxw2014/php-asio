@@ -23,7 +23,7 @@ namespace Asio
     {
         context_flag_ = true;
         if (callback_.isCallable())
-            Future::coroutine(callback_(this, socket, boost::numeric_cast<int64_t>(error.value()), argument_));
+            Future::coroutine(callback_(this, socket, static_cast<int64_t>(error.value()), argument_));
         context_flag_ = false;
         if (stopped_)
         {

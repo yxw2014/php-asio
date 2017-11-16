@@ -18,7 +18,7 @@ namespace Asio
     {
         std::string str_buffer(buffer->begin(), buffer->end());
         if (callback.isCallable())
-            Future::coroutine(callback(this, str_buffer, boost::numeric_cast<int64_t>(length), error.value(), argument));
+            Future::coroutine(callback(this, str_buffer, static_cast<int64_t>(length), error.value(), argument));
         delete buffer;
         return str_buffer;
     }
@@ -31,7 +31,7 @@ namespace Asio
         const Php::Value& argument,
         std::string* buffer)
     {
-        auto bytes_transferred = boost::numeric_cast<int64_t>(length);
+        auto bytes_transferred = static_cast<int64_t>(length);
         if (callback.isCallable())
             Future::coroutine(callback(this, bytes_transferred, error.value(), argument));
         delete buffer;
@@ -43,7 +43,7 @@ namespace Asio
     {
         if (closed_)
             throw Php::Exception("Trying to read on a closed socket.");
-        auto size = boost::numeric_cast<size_t>(length);
+        auto size = static_cast<size_t>(length);
         auto buffer_container = new std::vector<uint8_t>(size);
         auto buffer = boost::asio::buffer(*buffer_container, size);
         auto future = new Future(boost::bind(&Socket::read_handler, this, _1, _2, callback, argument, buffer_container));
@@ -126,7 +126,7 @@ namespace Asio
     template <typename Protocol>
     Php::Value Socket<Protocol>::available() const
     {
-        return boost::numeric_cast<int64_t>(socket_.available());
+        return static_cast<int64_t>(socket_.available());
     }
 
     template <typename Protocol>

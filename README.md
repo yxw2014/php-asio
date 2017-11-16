@@ -26,7 +26,7 @@ Bug reports and pull requests are welcome.
 * PHP-CPP and this extension **MUST** be built with the same version of PHP source code.
 * Do not use the 2.0.0 release of PHP-CPP. Use the GitHub master branch instead. See [here](https://cismon.net/2017/09/19/PHP-CPP-bug-which-causes-memory-leak/) for details.
 * Write your own cmake script if you want to build it on Windows. Now PHP-CPP officially supports Windows, which makes things easier.
-* It is strongly recommended that you use the latest stable version of libboost. I once used version 1.55, but it does not work well with PHP, sometimes you may get some absurd segfaults which are not fixable. Version 1.63 works fine. And perhaps you should do the same with your compiler.
+* It is strongly recommended that you use the latest stable version of libboost. I once used version 1.55, but it does not work well with PHP, sometimes you may get some absurd segfaults which are not fixable. Version 1.63 works fine.
 
 ## 3. Documentation
 

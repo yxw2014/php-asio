@@ -19,7 +19,7 @@ namespace Asio
     Php::Value Timer::handler(const boost::system::error_code& error)
     {
         if (callback_.isCallable())
-            Future::coroutine(callback_(this, argument_, boost::numeric_cast<int64_t>(error.value())));
+            Future::coroutine(callback_(this, argument_, static_cast<int64_t>(error.value())));
         return Php::Value();
     }
 

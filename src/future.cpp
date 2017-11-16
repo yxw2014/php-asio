@@ -1,3 +1,9 @@
+/**
+ * php-asio/future.cpp
+ *
+ * @author CismonX<admin@cismon.net>
+ */
+
 #include "future.hpp"
 #include "service.hpp"
 
@@ -8,7 +14,7 @@ namespace Asio
         send_ = callback_(ec, arg);
         if (yield_)
         {
-            Service::last_error_ = boost::numeric_cast<int64_t>(ec.value());
+            Service::last_error_ = static_cast<int64_t>(ec.value());
             generator_.call("send", send_);
             coroutine(generator_);
         }
