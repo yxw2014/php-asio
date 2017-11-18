@@ -18,11 +18,8 @@ namespace Asio
 
     Php::Value Service::add_tcp_server(Php::Parameters& params)
     {
-        auto port = params[1].numericValue();
-        if (port < 0 || port > 65535)
-            throw Php::Exception("Bad port number.");
         auto server = new TcpServer(io_service_);
-        server->init_acceptor(params[0].stringValue(), static_cast<unsigned short>(port));
+        server->init_acceptor(params[0].stringValue(), static_cast<unsigned short>(params[1].numericValue()));
         return server;
     }
 
@@ -38,24 +35,40 @@ namespace Asio
         return new Signal(io_service_);
     }
 
-    Php::Value Service::run()
+    Php::Value Service::run(Php::Parameters& params)
     {
-        return static_cast<int64_t>(io_service_.run());
+        boost::system::error_code ec;
+        auto handler_count = io_service_.run(ec);
+        if (params.size())
+            params[0] = static_cast<int64_t>(ec.value());
+        return static_cast<int64_t>(handler_count);
     }
 
-    Php::Value Service::run_one()
+    Php::Value Service::run_one(Php::Parameters& params)
     {
-        return static_cast<int64_t>(io_service_.run_one());
+        boost::system::error_code ec;
+        auto handler_count = io_service_.run_one(ec);
+        if (params.size())
+            params[0] = static_cast<int64_t>(ec.value());
+        return static_cast<int64_t>(handler_count);
     }
 
-    Php::Value Service::poll()
+    Php::Value Service::poll(Php::Parameters& params)
     {
-        return static_cast<int64_t>(io_service_.poll());
+        boost::system::error_code ec;
+        auto handler_count = io_service_.poll(ec);
+        if (params.size())
+            params[0] = static_cast<int64_t>(ec.value());
+        return static_cast<int64_t>(handler_count);
     }
 
-    Php::Value Service::poll_one()
+    Php::Value Service::poll_one(Php::Parameters& params)
     {
-        return static_cast<int64_t>(io_service_.poll_one());
+        boost::system::error_code ec;
+        auto handler_count = io_service_.poll_one(ec);
+        if (params.size())
+            params[0] = static_cast<int64_t>(ec.value());
+        return static_cast<int64_t>(handler_count);
     }
 
     void Service::stop()
@@ -76,8 +89,6 @@ namespace Asio
     void Service::post(Php::Parameters& params)
     {
         auto callback = params[0];
-        if (!callback.isCallable())
-            throw Php::Exception("Handler not callable.");
         auto argument = params.size() == 1 ? Php::Value() : params[1];
         io_service_.post([callback, argument]()
         {
@@ -85,10 +96,8 @@ namespace Asio
         });
     }
 
-    Php::Value Service::get_last_error()
+    boost::asio::io_service& Service::get_io_service()
     {
-        return last_error_;
+        return io_service_;
     }
-
-    thread_local int64_t Service::last_error_ = 0;
 }

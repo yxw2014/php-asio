@@ -26,26 +26,6 @@ namespace Asio
         typename Protocol::acceptor* acceptor_ = nullptr;
 
         /**
-         * Argument to be passed to acceptor callback.
-         */
-        Php::Value argument_;
-
-        /**
-         * Timer callback.
-         */
-        Php::Value callback_;
-
-        /**
-         * Whether the server is marked as stopped.
-         */
-        bool stopped_ = false;
-
-        /**
-         * Boolean flag for execution context.
-         */
-        bool context_flag_ = false;
-
-        /**
          * Async accept.
          */
         Future* accept();
@@ -66,9 +46,9 @@ namespace Asio
             boost::asio::io_service& io_service);
 
         /**
-         * Destructor.
+         * Default destructor.
          */
-        virtual ~Server();
+        virtual ~Server() = default;
 
         /**
          * Init acceptor for IP-based sockets.
@@ -91,7 +71,7 @@ namespace Asio
         /**
          * Stop server.
          */
-        void stop();
+        Php::Value stop();
 
     };
 

@@ -10,9 +10,8 @@ namespace Asio
 {
     Future* Timer::wait()
     {
-        timer_.expires_from_now(boost::posix_time::milliseconds(interval_));
-        auto future = new Future(boost::bind(&Timer::handler, this, boost::asio::placeholders::error));
-        timer_.async_wait(PHP_ASIO_ASYNC_HANDLER_NOARG);
+        auto future = new Future(boost::bind(&Timer::handler, this, _1));
+        timer_.async_wait(PHP_ASIO_ASYNC_HANDLER_SINGLE_ARG);
         return future;
     }
 
@@ -32,25 +31,37 @@ namespace Asio
         wrapper_ = new Php::Object("Asio\\Timer", this);
     }
 
+    Php::Value Timer::expire(Php::Parameters& params)
+    {
+        auto time = params[0].numericValue();
+        boost::system::error_code ec;
+        if (params.size() == 2 && params[1].boolValue())
+            timer_.expires_at(boost::posix_time::from_time_t(time / 1000) + boost::posix_time::millisec(time % 1000), ec);
+        else
+            timer_.expires_from_now(boost::posix_time::millisec(time), ec);
+        return static_cast<int64_t>(ec.value());
+    }
+
     Php::Value Timer::wait(Php::Parameters& params)
     {
         if (cancelled_)
             throw Php::Exception("Trying to wait for a cancelled timer.");
-        interval_ = params[0];
         auto param_count = params.size();
-        callback_ = param_count > 1 ? params[1] : Php::Value();
-        argument_ = param_count > 2 ? params[2] : Php::Value();
+        callback_ = param_count ? params[0] : Php::Value();
+        argument_ = param_count > 1 ? params[1] : Php::Value();
         return wait();
     }
 
-    void Timer::cancel()
+    Php::Value Timer::cancel()
     {
-        if (!cancelled_)
-        {
-            cancelled_ = true;
-            timer_.cancel();
+        if (cancelled_)
+            throw Php::Exception("Trying to cancel a cancelled timer.");
+        boost::system::error_code ec;
+        timer_.cancel(ec);
+        if (!ec) {
             delete wrapper_;
+            cancelled_ = true;
         }
+        return static_cast<int64_t>(ec.value());
     }
-
 }

@@ -6,22 +6,24 @@
  */
 
 $service = new Asio\Service();
-$service->addTimer()->wait(1000, function (Asio\Timer $timer, $arg, $ec) use ($service) {
+$timer = $service->addTimer();
+$timer->expire(1000);
+$timer->wait(function (Asio\Timer $timer, $arg, $ec) use ($service) {
     if ($ec)
         return;
     $counter = 0;
     while (1) {
-        $service->post(function () {
-            echo 'Wait for one second...', PHP_EOL;
-        });
+        // Using extra argument.
         echo $arg, PHP_EOL;
         if (++$counter >= 5) {
             $timer->cancel();
             return;
         } else {
-            //Using coroutine.
-            yield $timer->wait(1000);
-            if (\Asio\Service::lastError())
+            // Using timestamp.
+            $timer->expire(round(1000 * (microtime(true) + 1)), true);
+            // Using coroutine.
+            yield $timer->wait();
+            if (Asio\lastError())
                 return;
         }
     }

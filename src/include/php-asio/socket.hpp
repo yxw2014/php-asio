@@ -24,61 +24,38 @@ namespace Asio
         typename Protocol::socket socket_;
 
         /**
-         * Whether socket is marked as closed.
-         */
-        bool closed_ = false;
-
-        /**
          * Read/recieve handler for socket.
          * @param error : Error code
          * @param length : Bytes transferred
-         * @param callback : Handler callback
-         * @param argument : Extra argument
          * @param buffer : Read buffer
          */
-        Php::Value read_handler(
-            const boost::system::error_code& error,
-            size_t length,
-            const Php::Value& callback,
-            const Php::Value& argument,
-            std::vector<uint8_t>* buffer);
+        Php::Value read_handler(const boost::system::error_code& error, size_t length, std::vector<uint8_t>* buffer);
 
         /**
          * Write/send handler for socket.
          * @param error : Error code
          * @param length : Bytes transferred
-         * @param callback : Handler callback
-         * @param argument : Extra argument
          * @param buffer : Write buffer
          */
-        Php::Value write_handler(
-            const boost::system::error_code& error,
-            size_t length,
-            const Php::Value& callback,
-            const Php::Value& argument,
-            std::string* buffer);
+        Php::Value write_handler(const boost::system::error_code& error, size_t length, std::string* buffer);
 
         /**
          * The internal read method.
          * @param length : Maximum number fo bytes to read
          * @param read_some : If false, handler will not be called unless the required amount of bytes are recieved.
-         * @param callback : Read handler callback
-         * @param argument : Extra argument
          */
         template<typename P = Protocol, typename = typename std::enable_if<
             std::is_same<boost::asio::basic_stream_socket<P>, typename P::socket>::value>::type>
-        Future* read(int64_t length, bool read_some, const Php::Value& callback, const Php::Value& argument);
+        Future* read(int64_t length, bool read_some);
 
         /**
          * The internal write method.
          * @param data : Data to write to stream socket.
          * @param write_some : If false, handler will not be called unless all data is sent.
-         * @param callback : Read handler callback
-         * @param argument : Extra argument
          */
         template<typename P = Protocol, typename = typename std::enable_if<
             std::is_same<boost::asio::basic_stream_socket<P>, typename P::socket>::value>::type>
-        Future* write(const std::string& data, bool write_some, const Php::Value& callback, const Php::Value& argument);
+        Future* write(const std::string& data, bool write_some);
 
     public:
         /**
@@ -90,7 +67,7 @@ namespace Asio
         /**
          * Default destructor.
          */
-        virtual ~Socket();
+        virtual ~Socket() = default;
 
         /**
          * Wrap socket in Php::Object.
@@ -124,17 +101,17 @@ namespace Asio
         /**
          * Determine the number of bytes available for reading.
          */
-        Php::Value available() const;
+        Php::Value available(Php::Parameters&) const;
 
         /**
          * Determine whether the socket is at the out-of-band data mark.
          */
-        Php::Value at_mark() const;
+        Php::Value at_mark(Php::Parameters&) const;
 
         /**
          * Close socket.
          */
-        void close();
+        Php::Value close();
 
     };
 

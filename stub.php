@@ -53,30 +53,34 @@ class Service {
     /**
      * Run event loop(blocked).
      *
+     * @param int $ec[optional] : Error code
      * @return int : the number of handlers executed
      */
-    function run() {}
+    function run(int &$ec) {}
 
     /**
      * Execute at most one handler in event loop(blocked).
      *
+     * @param int $ec[optional] : Error code
      * @return int : the number of handlers executed
      */
-    function runOne() {}
+    function runOne(int &$ec) {}
 
     /**
      * Run event loop(not blocked).
      *
+     * @param int $ec[optional] : Error code
      * @return int : the number of handlers executed
      */
-    function poll() {}
+    function poll(int &$ec) {}
 
     /**
      * Execute at most one handler in event loop(not blocked).
      *
+     * @param int $ec[optional] : Error code
      * @return int : the number of handlers executed
      */
-    function pollOne() {}
+    function pollOne(int &$ec) {}
 
     /**
      * Execute the given callback the next tick.
@@ -86,13 +90,6 @@ class Service {
      * @return int : the number of handlers executed
      */
     function post(callable $callback, $argument = null) {}
-
-    /**
-     * Get last error code emitted by yielded async operations of this thread.
-     *
-     * @return int
-     */
-    static function lastError() {}
 }
 
 /**
@@ -123,20 +120,29 @@ final class Timer {
     private function __construct() {}
 
     /**
-     * Defer the timer once.
-     * Do not pass arguments and the original ones will be preserved.
+     * Set timer expiry time.
      *
-     * @param int $interval : Milliseconds
+     * @param int $time : Milliseconds from now or UNIX timestamp(in milliseconds).
+     * @param bool $use_timestamp : Use timestamp or relative time as first parameter.
+     * @return int : Error code.
+     */
+    function expire(int $time, bool $use_timestamp = false) {}
+
+    /**
+     * Wait for timer to expire.
+     *
      * @param callable $callback[optional]
      * @param mixed $argument
      * @throws \Exception
      * @return Future : Resolves null
      */
-    function wait(int $interval, callable $callback, $argument = null) {}
+    function wait(callable $callback, $argument = null) {}
 
     /**
      * Cancel the timer.
      * All async operations will resolve immediately with error.
+     *
+     * @return int : Error code
      */
     function cancel() {}
 }
@@ -151,21 +157,23 @@ interface Socket {
     /**
      * Determine the number of bytes available for reading.
      *
+     * @param int $ec[optional] : Error code
      * @return int
      */
-    function available();
+    function available(int &$ec);
 
     /**
      * Determine whether the socket is at the out-of-band data mark.
      *
+     * @param int $ec[optional] : Error code
      * @return bool
      */
-    function atMark();
+    function atMark(int &$ec);
 
     /**
      * Close socket.
      *
-     * @return void
+     * @return int : Error code
      */
     function close();
 }
@@ -199,7 +207,7 @@ interface StreamSocket extends Socket {
      * @throws \Exception
      * @return Future : Resolves bytes transferred(int)
      */
-    function write(string $data, bool $write_some, callable $callback = null, $argument = null);
+    function write(string $data, bool $write_some, callable $callback, $argument = null);
 }
 
 /**
@@ -222,7 +230,7 @@ interface Server {
     /**
      * Stop server and cancel all async operations related to it.
      *
-     * @return void
+     * @return int : Error code
      */
     function stop();
 }
@@ -298,12 +306,12 @@ final class TcpSocket implements StreamSocket {
     /**
      * {@inheritdoc}
      */
-    function available() {}
+    function available(int &$ec = null) {}
 
     /**
      * {@inheritdoc}
      */
-    function atMark() {}
+    function atMark(int &$ec = null) {}
 
     /**
      * {@inheritdoc}
@@ -336,12 +344,12 @@ final class UnixSocket implements StreamSocket {
     /**
      * {@inheritdoc}
      */
-    function available() {}
+    function available(int &$ec = null) {}
 
     /**
      * {@inheritdoc}
      */
-    function atMark() {}
+    function atMark(int &$ec = null) {}
 
     /**
      * {@inheritdoc}
@@ -374,6 +382,7 @@ final class Signal {
      *
      * @param callable $callback[optional]
      * @param mixed $argument
+     * @return Future
      */
     function wait(callable $callback, $argument = null) {}
 
@@ -402,3 +411,10 @@ final class Signal {
      */
     function cancel() {}
 }
+
+/**
+ * Get last error code emitted by yielded async operations of this thread.
+ *
+ * @return int
+ */
+function lastError() {}

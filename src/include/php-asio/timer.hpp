@@ -23,26 +23,6 @@ namespace Asio
         boost::asio::deadline_timer timer_;
 
         /**
-         * Timer interval(milliseconds).
-         */
-        int64_t interval_;
-
-        /**
-         * Argument to be passed to timer callback.
-         */
-        Php::Value argument_;
-
-        /**
-         * Timer callback.
-         */
-        Php::Value callback_;
-
-        /**
-         * Boolean flag for execution context.
-         */
-        bool cancelled_ = false;
-
-        /**
          * Defer the timer.
          */
         Future* wait();
@@ -66,14 +46,19 @@ namespace Asio
         virtual ~Timer() = default;
 
         /**
-         * Set next expire time for timer.
+         * Set timer expiry time.
+         */
+        Php::Value expire(Php::Parameters& params);
+
+        /**
+         * Wait for timer to expire.
          */
         Php::Value wait(Php::Parameters& params);
 
         /**
          * Cancel timer.
          */
-        void cancel();
+        Php::Value cancel();
 
     };
 }

@@ -18,6 +18,11 @@ namespace Asio
     class Future : public Php::Base
     {
         /**
+         * Last error code emitted by yielded async operations of this thread.
+         */
+        static thread_local int64_t last_error_;
+
+        /**
          * Handler callback of the async operation.
          */
         std::function<Php::Value(const boost::system::error_code&, unsigned)> callback_;
@@ -50,6 +55,21 @@ namespace Asio
         explicit Future(const std::function<Php::Value(const boost::system::error_code&, unsigned)>&& callback);
 
         /**
+         * Deleted default constructor.
+         */
+        Future() = delete;
+
+        /**
+         * Deleted copy constructor.
+         */
+        Future(const Future&) = delete;
+
+        /**
+         * Deleted copy assignment operator.
+         */
+        Future& operator=(const Future&) = delete;
+
+        /**
          * Default destructor.
          */
         virtual ~Future() = default;
@@ -66,5 +86,9 @@ namespace Asio
          */
         static void coroutine(const Php::Value& generator);
 
+        /**
+         * Get last error emitted by handler callback within yielded Future.
+         */
+        static Php::Value get_last_error();
     };
 }

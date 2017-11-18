@@ -12,17 +12,32 @@ namespace Asio
 {
     class Base : public Php::Base
     {
-    protected:
 
+    protected:
         /**
          * IO service of this object.
          */
         boost::asio::io_service& io_service_;
 
         /**
+         * Extra argument to be passed to handler callback.
+         */
+        Php::Value argument_;
+
+        /**
+         * Handler callback.
+         */
+        Php::Value callback_;
+
+        /**
+         * True when all async operations have been cancelled and this object is about to destroy.
+         */
+        bool cancelled_ = false;
+
+        /**
          * PHP wrapper for this object.
          */
-        Php::Object* wrapper_;
+        Php::Object* wrapper_ = nullptr;
 
         /**
          * Constructor.
@@ -45,6 +60,7 @@ namespace Asio
          */
         Base& operator=(const Base&) = delete;
 
+    public:
         /**
          * Destructor.
          */

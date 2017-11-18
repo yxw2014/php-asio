@@ -13,10 +13,10 @@ $read_cb = function (Asio\StreamSocket $socket, $data, $length, $ec, $arg) {
     while (1) {
         echo 'Client sent: ', $data, PHP_EOL;
         //Wait for write completion before read again.
-        $bytes_transferred = yield $socket->write('Server received: '.$data.PHP_EOL, false);
+        yield $socket->write('Server received: '.$data.PHP_EOL, false);
         //Socket read resolves received data.
         $data = yield $socket->read(64, true);
-        if (\Asio\Service::lastError()) {
+        if (Asio\lastError()) {
             $socket->close();
             return;
         }
@@ -28,11 +28,12 @@ $acceptor_cb = function (Asio\Server $server, Asio\StreamSocket $socket, $ec, $a
         return;
     }
     while (1) {
-        $socket->write('Connected to server.'.PHP_EOL, false);
+        //Socket write resolves number of bytes transferred.
+        $bytes_transferred = yield $socket->write('Connected to server.'.PHP_EOL, false);
         $socket->read(64, true, $read_cb);
         //Server accept resolves Socket.
         $socket = yield $server->accept();
-        if (\Asio\Service::lastError()) {
+        if (Asio\lastError()) {
             $server->stop();
             return;
         }

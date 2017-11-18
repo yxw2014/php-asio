@@ -19,7 +19,7 @@ namespace Asio
     Future* Signal::wait()
     {
         auto future = new Future(boost::bind(&Signal::handler, this, _1, _2));
-        signal_.async_wait(PHP_ASIO_ASYNC_HANDLER(boost::asio::placeholders::signal_number));
+        signal_.async_wait(PHP_ASIO_ASYNC_HANDLER_DOUBLE_ARG);
         return future;
     }
 
@@ -38,8 +38,7 @@ namespace Asio
     int64_t Signal::add(const std::vector<Php::Value>&& signals)
     {
         boost::system::error_code ec;
-        for (const auto& param : signals)
-        {
+        for (const auto& param : signals) {
             if (!param.isNumeric())
                 throw Php::Exception("Integer value expected.");
             auto signal = param.numericValue();
@@ -54,8 +53,7 @@ namespace Asio
         if (cancelled_)
             throw Php::Exception("Trying to remove signal on a cancelled signal set.");
         boost::system::error_code ec;
-        for (const auto& param : params)
-        {
+        for (const auto& param : params) {
             if (!param.isNumeric())
                 throw Php::Exception("Integer value expected.");
             auto signal = param.numericValue();
@@ -90,7 +88,10 @@ namespace Asio
             throw Php::Exception("Trying to cancel a cancelled signal set.");
         boost::system::error_code ec;
         signal_.cancel(ec);
-        delete wrapper_;
+        if (!ec) {
+            cancelled_ = true;
+            delete wrapper_;
+        }
         return static_cast<int64_t>(ec.value());
     }
 }

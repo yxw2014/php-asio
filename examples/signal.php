@@ -6,12 +6,17 @@
  */
 
 $service = new Asio\Service;
-$signal = $service->addSignal();
-$signal->add(SIGINT, SIGTERM);
-$signal->wait(function (Asio\Signal $signal, int $sig_num, $arg, $ec) {
-    if ($ec)
+// Using Service::post.
+$service->post(function () use ($service) {
+    $signal = $service->addSignal();
+    $signal->add(SIGINT, SIGTERM);
+    $sig_num = yield $signal->wait();
+    if (Asio\lastError()) {
+        $signal->cancel();
         return;
-    echo "Server received signal $sig_num. Exiting...\n";
-    exit(0);
-}, null);
+    }
+    echo "Server received signal $sig_num. Send signal again to exit.\n";
+    yield $signal->wait();
+});
+//Service stop running when there are no pending async operations.
 $service->run();

@@ -7,7 +7,6 @@
 #pragma once
 
 #include "common.hpp"
-#include "future.hpp"
 
 namespace Asio
 {
@@ -22,11 +21,6 @@ namespace Asio
          * The io_service of all IO objects in current instance
          */
         boost::asio::io_service io_service_;
-
-        /**
-         * Last error code emitted by yielded async operations of this thread.
-         */
-        static thread_local int64_t last_error_;
 
     public:
 
@@ -73,22 +67,22 @@ namespace Asio
         /**
          * Start event loop in block mode.
          */
-        Php::Value run();
+        Php::Value run(Php::Parameters&);
 
         /**
          * Excecute at most one handler within the event loop in block mode.
          */
-        Php::Value run_one();
+        Php::Value run_one(Php::Parameters&);
 
         /**
         * Start event loop in non-block mode.
         */
-        Php::Value poll();
+        Php::Value poll(Php::Parameters&);
 
         /**
         * Excecute at most one handler within the event loop in non-block mode.
         */
-        Php::Value poll_one();
+        Php::Value poll_one(Php::Parameters&);
 
         /**
          * Cancel all pending handlers within the event loop.
@@ -115,20 +109,7 @@ namespace Asio
          * 
          * Can be used when working on another extension based on Boost.Asio.
          */
-        boost::asio::io_service& get_io_service()
-        {
-            return io_service_;
-        }
-
-        /**
-         * Get last error code.
-         */
-        static Php::Value get_last_error();
-
-        /**
-         * Last error is set by Future resolver.
-         */
-        friend void Future::resolve(const boost::system::error_code&, unsigned);
+        boost::asio::io_service& get_io_service();
 
     };
 }

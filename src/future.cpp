@@ -12,9 +12,8 @@ namespace Asio
     void Future::resolve(const boost::system::error_code& ec, unsigned arg)
     {
         send_ = callback_(ec, arg);
-        if (yield_)
-        {
-            Service::last_error_ = static_cast<int64_t>(ec.value());
+        if (yield_) {
+            last_error_ = static_cast<int64_t>(ec.value());
             generator_.call("send", send_);
             coroutine(generator_);
         }
@@ -28,8 +27,7 @@ namespace Asio
 
     void Future::coroutine(const Php::Value& generator)
     {
-        if (generator.instanceOf("Generator") && generator.call("valid").boolValue())
-        {
+        if (generator.instanceOf("Generator") && generator.call("valid").boolValue()) {
             auto value = generator.call("current");
             if (!value.instanceOf("Asio\\Future"))
                 generator.call("throw", Php::Object("Exception", "Invalid yield value. Future expected."));
@@ -38,4 +36,11 @@ namespace Asio
             future->yield_ = true;
         }
     }
+
+    Php::Value Future::get_last_error()
+    {
+        return last_error_;
+    }
+
+    thread_local int64_t Future::last_error_ = 0;
 }

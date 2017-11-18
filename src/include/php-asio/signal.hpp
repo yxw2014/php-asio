@@ -20,22 +20,7 @@ namespace Asio
         boost::asio::signal_set signal_;
 
         /**
-         * Argument to be passed to signal callback.
-         */
-        Php::Value argument_;
-
-        /**
-         * Signal callback.
-         */
-        Php::Value callback_;
-
-        /**
-         * Whether signal handler is marked as cancelled.
-         */
-        bool cancelled_ = false;
-
-        /**
-         * Signal handler.
+         * Signal handler callback.
          * @param error : Error code
          * @param signal : Signal number
          */
@@ -64,7 +49,7 @@ namespace Asio
         virtual ~Signal() = default;
 
         /**
-         * Add signals.
+         * Add signal numbers.
          */
         Php::Value add(Php::Parameters&);
 
