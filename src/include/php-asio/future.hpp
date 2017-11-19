@@ -73,16 +73,16 @@ namespace Asio
         /**
          * Set future resolver callback.
          */
-        template <typename Arg>
-        void on_resolve(const ASYNC_CALLBACK(Arg)&& callback);
+        template <typename T>
+        void on_resolve(const ASYNC_CALLBACK(T)&& callback);
 
         /**
          * Resolve the Future upon operation completion.
          * @param ec : Error code
          * @param arg : Dependent argument
          */
-        template <typename Arg>
-        void resolve(const boost::system::error_code& ec, Arg arg);
+        template <typename T>
+        void resolve(const boost::system::error_code& ec, T arg);
 
         /**
          * Attempt to start/resume a coroutine with a PHP Generator.

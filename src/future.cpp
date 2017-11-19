@@ -9,16 +9,16 @@
 
 namespace Asio
 {
-    template <typename Arg>
-    void Future::on_resolve(const ASYNC_CALLBACK(Arg)&& callback)
+    template <typename T>
+    void Future::on_resolve(const ASYNC_CALLBACK(T)&& callback)
     {
-        callback_ = new ASYNC_CALLBACK(Arg)(std::move(callback));
+        callback_ = new ASYNC_CALLBACK(T)(std::move(callback));
     }
 
-    template <typename Arg>
-    void Future::resolve(const boost::system::error_code& ec, Arg arg)
+    template <typename T>
+    void Future::resolve(const boost::system::error_code& ec, T arg)
     {
-        auto callback = static_cast<ASYNC_CALLBACK(Arg)*>(callback_);
+        auto callback = static_cast<ASYNC_CALLBACK(T)*>(callback_);
         send_ = (*callback)(ec, arg);
         if (yield_) {
             last_error_ = static_cast<int64_t>(ec.value());
@@ -53,6 +53,7 @@ namespace Asio
 
     thread_local int64_t Future::last_error_ = 0;
 
+    // Initialization for future.
     template void Future::on_resolve(const ASYNC_CALLBACK(int)&&);
     template void Future::resolve(const boost::system::error_code&, int);
     template void Future::on_resolve(const ASYNC_CALLBACK(size_t)&&);
