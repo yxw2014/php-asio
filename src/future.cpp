@@ -9,18 +9,27 @@
 
 namespace Asio
 {
-    void Future::resolve(const boost::system::error_code& ec, unsigned arg)
+    template <typename Arg>
+    void Future::on_resolve(const ASYNC_CALLBACK(Arg)&& callback)
     {
-        send_ = callback_(ec, arg);
+        callback_ = new ASYNC_CALLBACK(Arg)(std::move(callback));
+    }
+
+    template <typename Arg>
+    void Future::resolve(const boost::system::error_code& ec, Arg arg)
+    {
+        auto callback = static_cast<ASYNC_CALLBACK(Arg)*>(callback_);
+        send_ = (*callback)(ec, arg);
         if (yield_) {
             last_error_ = static_cast<int64_t>(ec.value());
             generator_.call("send", send_);
             coroutine(generator_);
         }
+        delete callback;
         delete wrapper_;
     }
 
-    Future::Future(const std::function<Php::Value(const boost::system::error_code&, unsigned)>&& callback) : callback_(move(callback))
+    Future::Future()
     {
         wrapper_ = new Php::Object("Asio\\Future", this);
     }
@@ -43,4 +52,9 @@ namespace Asio
     }
 
     thread_local int64_t Future::last_error_ = 0;
+
+    template void Future::on_resolve(const ASYNC_CALLBACK(int)&&);
+    template void Future::resolve(const boost::system::error_code&, int);
+    template void Future::on_resolve(const ASYNC_CALLBACK(size_t)&&);
+    template void Future::resolve(const boost::system::error_code&, size_t);
 }

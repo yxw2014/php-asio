@@ -36,11 +36,12 @@ namespace Asio
         auto size = static_cast<size_t>(length);
         auto buffer_container = new std::vector<uint8_t>(size);
         auto buffer = boost::asio::buffer(*buffer_container, size);
-        auto future = new Future(boost::bind(&Socket::read_handler, this, _1, _2, buffer_container));
+        auto future = new Future();
+        future->on_resolve<size_t>(boost::bind(&Socket::read_handler, this, _1, _2, buffer_container));
         if (read_some)
-            socket_.async_read_some(buffer, PHP_ASIO_ASYNC_HANDLER_DOUBLE_ARG);
+            socket_.async_read_some(buffer, ASYNC_HANDLER_DOUBLE_ARG(size_t));
         else
-            async_read(socket_, buffer, PHP_ASIO_ASYNC_HANDLER_DOUBLE_ARG);
+            async_read(socket_, buffer, ASYNC_HANDLER_DOUBLE_ARG(size_t));
         return future;
     }
 
@@ -51,11 +52,12 @@ namespace Asio
             throw Php::Exception("Trying to write to a closed socket.");
         // Note that `data` gets out of scope when handler callback is called.
         auto buffer = new std::string(data);
-        auto future = new Future(boost::bind(&Socket::write_handler, this, _1, _2, buffer));
+        auto future = new Future();
+        future->on_resolve<size_t>(boost::bind(&Socket::write_handler, this, _1, _2, buffer));
         if (write_some)
-            socket_.async_write_some(boost::asio::buffer(*buffer), PHP_ASIO_ASYNC_HANDLER_DOUBLE_ARG);
+            socket_.async_write_some(boost::asio::buffer(*buffer), ASYNC_HANDLER_DOUBLE_ARG(size_t));
         else
-            async_write(socket_, boost::asio::buffer(*buffer), PHP_ASIO_ASYNC_HANDLER_DOUBLE_ARG);
+            async_write(socket_, boost::asio::buffer(*buffer), ASYNC_HANDLER_DOUBLE_ARG(size_t));
         return future;
     }
 

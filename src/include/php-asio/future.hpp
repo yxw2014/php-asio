@@ -8,6 +8,8 @@
 
 #include "common.hpp"
 
+#define ASYNC_CALLBACK(type) std::function<Php::Value(const boost::system::error_code, type)>
+
 namespace Asio
 {
     /**
@@ -25,7 +27,7 @@ namespace Asio
         /**
          * Handler callback of the async operation.
          */
-        std::function<Php::Value(const boost::system::error_code&, unsigned)> callback_;
+        void* callback_;
 
         /**
          * Generator instance which yielded this Future.
@@ -50,14 +52,8 @@ namespace Asio
     public:
         /**
          * Constructor.
-         * @param callback : Handler callback
          */
-        explicit Future(const std::function<Php::Value(const boost::system::error_code&, unsigned)>&& callback);
-
-        /**
-         * Deleted default constructor.
-         */
-        Future() = delete;
+        explicit Future();
 
         /**
          * Deleted copy constructor.
@@ -75,11 +71,18 @@ namespace Asio
         virtual ~Future() = default;
 
         /**
+         * Set future resolver callback.
+         */
+        template <typename Arg>
+        void on_resolve(const ASYNC_CALLBACK(Arg)&& callback);
+
+        /**
          * Resolve the Future upon operation completion.
          * @param ec : Error code
          * @param arg : Dependent argument
          */
-        void resolve(const boost::system::error_code& ec, unsigned arg);
+        template <typename Arg>
+        void resolve(const boost::system::error_code& ec, Arg arg);
 
         /**
          * Attempt to start/resume a coroutine with a PHP Generator.

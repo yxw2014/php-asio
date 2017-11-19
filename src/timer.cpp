@@ -10,8 +10,9 @@ namespace Asio
 {
     Future* Timer::wait()
     {
-        auto future = new Future(boost::bind(&Timer::handler, this, _1));
-        timer_.async_wait(PHP_ASIO_ASYNC_HANDLER_SINGLE_ARG);
+        auto future = new Future();
+        future->on_resolve<NOARG>(boost::bind(&Timer::handler, this, _1));
+        timer_.async_wait(ASYNC_HANDLER_SINGLE_ARG);
         return future;
     }
 

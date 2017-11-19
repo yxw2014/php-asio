@@ -18,8 +18,9 @@ namespace Asio
 
     Future* Signal::wait()
     {
-        auto future = new Future(boost::bind(&Signal::handler, this, _1, _2));
-        signal_.async_wait(PHP_ASIO_ASYNC_HANDLER_DOUBLE_ARG);
+        auto future = new Future();
+        future->on_resolve<int>(boost::bind(&Signal::handler, this, _1, _2));
+        signal_.async_wait(ASYNC_HANDLER_DOUBLE_ARG(int));
         return future;
     }
 

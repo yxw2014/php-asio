@@ -13,8 +13,9 @@ namespace Asio
     {
         auto socket = new Socket<Protocol>(io_service_);
         socket->wrap();
-        auto future = new Future(boost::bind(&Server::handler, this, _1, socket));
-        acceptor_->async_accept(socket->getSocket(), PHP_ASIO_ASYNC_HANDLER_SINGLE_ARG);
+        auto future = new Future();
+        future->on_resolve<NOARG>(boost::bind(&Server::handler, this, _1, socket));
+        acceptor_->async_accept(socket->getSocket(), ASYNC_HANDLER_SINGLE_ARG);
         return future;
     }
 

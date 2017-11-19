@@ -12,7 +12,10 @@
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 
-#define PHP_ASIO_ASYNC_HANDLER_SINGLE_ARG std::function<void(const boost::system::error_code&)>( \
-    boost::bind(&Future::resolve, future, boost::asio::placeholders::error, 0U))
-#define PHP_ASIO_ASYNC_HANDLER_DOUBLE_ARG std::function<void(const boost::system::error_code&, unsigned)>( \
-    boost::bind(&Future::resolve, future, boost::asio::placeholders::error, _2))
+// Handlers with one argument is treated as ones with two arguments.
+// No worry about performance. It will be optimized out.
+#define NOARG int
+#define ASYNC_HANDLER_SINGLE_ARG std::function<void(const boost::system::error_code&)>( \
+    boost::bind(&Future::resolve<NOARG>, future, boost::asio::placeholders::error, 0))
+#define ASYNC_HANDLER_DOUBLE_ARG(type) std::function<void(const boost::system::error_code&, type)>( \
+    boost::bind(&Future::resolve<type>, future, boost::asio::placeholders::error, _2))
