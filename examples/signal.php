@@ -6,7 +6,7 @@
  */
 
 $service = new Asio\Service;
-// Using Service::post.
+// Using Service::post().
 $service->post(function () use ($service) {
     $signal = $service->addSignal();
     $signal->add(SIGINT, SIGTERM);

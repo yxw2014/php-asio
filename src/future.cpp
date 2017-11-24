@@ -46,16 +46,15 @@ namespace Asio
         }
     }
 
-    Php::Value Future::get_last_error()
-    {
-        return last_error_;
-    }
-
     thread_local int64_t Future::last_error_ = 0;
 
-    // Initialization for future.
+    // Initialization for Future.
     template void Future::on_resolve(const ASYNC_CALLBACK(int)&&);
     template void Future::resolve(const boost::system::error_code&, int);
     template void Future::on_resolve(const ASYNC_CALLBACK(size_t)&&);
     template void Future::resolve(const boost::system::error_code&, size_t);
+    template void Future::on_resolve(const ASYNC_CALLBACK(tcp::resolver::iterator)&&);
+    template void Future::resolve(const boost::system::error_code&, tcp::resolver::iterator);
+    template void Future::on_resolve(const ASYNC_CALLBACK(udp::resolver::iterator)&&);
+    template void Future::resolve(const boost::system::error_code&, udp::resolver::iterator);
 }

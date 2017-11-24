@@ -14,8 +14,8 @@ namespace Asio;
  *
  * @package Asio
  */
-class Service {
-
+class Service
+{
     /**
      * Add Timer.
      *
@@ -24,23 +24,46 @@ class Service {
     function addTimer() {}
 
     /**
-     * Add TCP server.
+     * Add TCP acceptor.
      *
-     * @param string $address : Local IP address. IPv4(e.g. '0.0.0.0') and IPv6(e.g. '::') supported.
-     * @param int $port : Local port to bind to.
-     * @throws \Exception
-     * @return TcpServer
+     * @return TcpAcceptor
      */
-    function addTcpServer(string $address, int $port) {}
+    function addTcpAcceptor() {}
 
     /**
-     * Add UNIX stream socket server.
+     * Add UNIX stream socket acceptor.
      *
-     * @param string $path : Path to socket file.
-     * @throws \Exception
-     * @return UnixServer
+     * @return UnixAcceptor
      */
-    function addUnixServer(string $path) {}
+    function addUnixAcceptor() {}
+
+    /**
+     * Resolve TCP-based services.
+     *
+     * @return TcpResolver
+     */
+    function addTcpResolver() {}
+
+    /**
+     * Resolve UDP-based services.
+     *
+     * @return UdpResolver
+     */
+    function addUdpResolver() {}
+
+    /**
+     * Add a TCP socket.
+     *
+     * @return TcpSocket
+     */
+    function addTcpSocket() {}
+
+    /**
+     * Add a UNIX domain socket (SOCK_STREAM).
+     *
+     * @return UnixSocket
+     */
+    function addUnixSocket() {}
 
     /**
      * Add signal handler.
@@ -98,8 +121,8 @@ class Service {
  *
  * @package Asio
  */
-final class Future {
-
+final class Future
+{
     /**
      * This class can only be instantiated by asynchronous operations.
      */
@@ -112,8 +135,8 @@ final class Future {
  *
  * @package Asio
  */
-final class Timer {
-
+final class Timer
+{
     /**
      * This class can only be instantiated using "Service::addTimer()".
      */
@@ -152,8 +175,8 @@ final class Timer {
  *
  * @package Asio
  */
-interface Socket {
-
+interface Socket
+{
     /**
      * Determine the number of bytes available for reading.
      *
@@ -183,8 +206,8 @@ interface Socket {
  *
  * @package Asio
  */
-interface StreamSocket extends Socket {
-
+interface StreamSocket extends Socket
+{
     /**
      * Asynchronously read from the stream socket.
      *
@@ -195,7 +218,7 @@ interface StreamSocket extends Socket {
      * @throws \Exception
      * @return Future : Resolves received data(string)
      */
-    function read(int $length, bool $read_some, callable $callback, $argument = null);
+    function read(int $length, bool $read_some = true, callable $callback, $argument = null);
 
     /**
      * Asynchronously write to the stream socket.
@@ -207,7 +230,76 @@ interface StreamSocket extends Socket {
      * @throws \Exception
      * @return Future : Resolves bytes transferred(int)
      */
-    function write(string $data, bool $write_some, callable $callback, $argument = null);
+    function write(string $data, bool $write_some = false, callable $callback, $argument = null);
+}
+
+/**
+ * Interface InetSocket
+ *
+ * @package Asio
+ */
+interface InetSocket extends Socket
+{
+    /**
+     * Open socket.
+     *
+     * @param bool $use_ipv6 : True for AF_INET6, false for AF_INET
+     * @return int : Error code
+     */
+    function open(bool $use_ipv6);
+
+    /**
+     * Bind socket to an endpoint.
+     *
+     * @param string $address
+     * @param int $port
+     * @return int : Error code
+     */
+    function bind(string $address, int $port);
+
+    /**
+     * Get remote endpoint address.
+     *
+     * @return string
+     */
+    function remoteAddr();
+
+    /**
+     * Get remote endpoint port.
+     *
+     * @return mixed
+     */
+    function remotePort();
+}
+
+/**
+ * Interface LocalSocket
+ *
+ * @package Asio
+ */
+interface LocalSocket extends Socket
+{
+    /**
+     * Open socket.
+     *
+     * @return int : Error code
+     */
+    function open();
+
+    /**
+     * Bind socket to an endpoint.
+     *
+     * @param string $path : Path to socket file
+     * @return mixed
+     */
+    function bind(string $path);
+
+    /**
+     * Get remote endpoint path.
+     *
+     * @return string
+     */
+    function remotePath();
 }
 
 /**
@@ -215,7 +307,14 @@ interface StreamSocket extends Socket {
  *
  * @package Asio
  */
-interface Server {
+interface Acceptor
+{
+    /**
+     * @param int $backlog[optional] : The maximum length of the queue of pending connections.
+     *                                 Default to boost::asio::socket_base::max_connections.
+     * @return mixed
+     */
+    function listen(int $backlog);
 
     /**
      * Accept incoming client connection once.
@@ -236,16 +335,57 @@ interface Server {
 }
 
 /**
+ * Interface Resolver
+ *
+ * @package Asio
+ */
+interface Resolver
+{
+    /**
+     * Start async resolve.
+     *
+     * @param string $host : Host name
+     * @param string $service
+     * @param callable $callback[optional] : Resolver callback
+     * @param mixed $argument
+     * @return Future
+     */
+    function resolve(string $host, string $service = '', callable $callback, $argument = null);
+}
+
+/**
  * Wrapper for Boost.Asio TCP acceptor.
  *
  * @package Asio
  */
-final class TcpServer implements Server {
-
+final class TcpAcceptor implements Acceptor
+{
     /**
      * This class can only be instantiated using "Service::addTcpServer()".
      */
     private function __construct() {}
+
+    /**
+     * Open acceptor.
+     *
+     * @param bool $use_ipv6 : True for AF_INET6, false for AF_INET
+     * @return int : Error code
+     */
+    function open(bool $use_ipv6) {}
+
+    /**
+     * Bind acceptor to local endpoint.
+     *
+     * @param string $address
+     * @param int $port
+     * @return int : Error code
+     */
+    function bind(string $address, int $port) {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function listen(int $backlog = null) {}
 
     /**
      * {@inheritdoc}
@@ -263,12 +403,32 @@ final class TcpServer implements Server {
  *
  * @package Asio
  */
-final class UnixServer implements Server {
-
+final class UnixAcceptor implements Acceptor
+{
     /**
      * This class can only be instantiated using "Service::addUnixServer()".
      */
     private function __construct() {}
+
+    /**
+     * Open acceptor.
+     *
+     * @return int : Error code.
+     */
+    function open() {}
+
+    /**
+     * Bind acceptor to local endpoint.
+     *
+     * @param string $path
+     * @return int : Error code.
+     */
+    function bind(string $path) {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function listen(int $backlog = null) {}
 
     /**
      * {@inheritdoc}
@@ -286,8 +446,8 @@ final class UnixServer implements Server {
  *
  * @package Asio
  */
-final class TcpSocket implements StreamSocket {
-
+final class TcpSocket implements StreamSocket, InetSocket
+{
     /**
      * This class can only be instantiated by TcpServer.
      */
@@ -296,12 +456,42 @@ final class TcpSocket implements StreamSocket {
     /**
      * {@inheritdoc}
      */
-    function read(int $length, bool $read_some, callable $callback = null, $argument = null) {}
+    function open(bool $use_ipv6) {}
 
     /**
      * {@inheritdoc}
      */
-    function write(string $data, bool $write_some, callable $callback = null, $argument = null) {}
+    function bind(string $address, int $port) {}
+
+    /**
+     * Connect to a remote endpoint.
+     *
+     * @param string $address : Remote address
+     * @param int $port : Remote port
+     * @param callable $callback[optional]
+     * @param mixed $argument
+     */
+    function connect(string $address, int $port, callable $callback, $argument = null) {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function read(int $length, bool $read_some = true, callable $callback = null, $argument = null) {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function write(string $data, bool $write_some = false, callable $callback = null, $argument = null) {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function remoteAddr() {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function remotePort() {}
 
     /**
      * {@inheritdoc}
@@ -324,8 +514,8 @@ final class TcpSocket implements StreamSocket {
  *
  * @package Asio
  */
-final class UnixSocket implements StreamSocket {
-
+final class UnixSocket implements StreamSocket, LocalSocket
+{
     /**
      * This class can only be instantiated by UnixServer.
      */
@@ -334,12 +524,37 @@ final class UnixSocket implements StreamSocket {
     /**
      * {@inheritdoc}
      */
-    function read(int $length, bool $read_some, callable $callback = null, $argument = null) {}
+    function open() {}
 
     /**
      * {@inheritdoc}
      */
-    function write(string $data, bool $write_some, callable $callback = null, $argument = null) {}
+    function bind(string $path) {}
+
+    /**
+     * Connect to a remote endpoint.
+     *
+     * @param string $path : Remote socket file path
+     * @param callable $callback[optional]
+     * @param mixed $argument
+     * @return int : Error code
+     */
+    function connect(string $path, callable $callback, $argument = null) {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function read(int $length, bool $read_some = true, callable $callback = null, $argument = null) {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function write(string $data, bool $write_some = false, callable $callback = null, $argument = null) {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function remotePath() {}
 
     /**
      * {@inheritdoc}
@@ -358,11 +573,48 @@ final class UnixSocket implements StreamSocket {
 }
 
 /**
- * Wrapper for Boost.Asio signal_set.
+ * Wrapper for Boost.Asio TCP resolver.
+ *
  * @package Asio
  */
-final class Signal {
+final class TcpResolver implements Resolver
+{
+    /**
+     * This class can only be instantiated using "Service::addTcpResolver()".
+     */
+    private function __construct() {}
 
+    /**
+     * {@inheritdoc}
+     */
+    function resolve(string $host, string $service = '', callable $callback = null, $argument = null) {}
+}
+
+/**
+ * Wrapper for Boost.Asio UDP resolver.
+ *
+ * @package Asio
+ */
+final class UdpResolver implements Resolver
+{
+    /**
+     * This class can only be instantiated using "Service::addTcpResolver()".
+     */
+    private function __construct() {}
+
+    /**
+     * {@inheritdoc}
+     */
+    function resolve(string $host, string $service = '', callable $callback = null, $argument = null) {}
+}
+
+/**
+ * Wrapper for Boost.Asio signal_set.
+ *
+ * @package Asio
+ */
+final class Signal
+{
     /**
      * This class can only be instantiated using "Service::addSignal()".
      */

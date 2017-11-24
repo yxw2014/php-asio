@@ -10,15 +10,14 @@ namespace Asio
 {
     Php::Value Signal::handler(const boost::system::error_code& error, int signal)
     {
-        auto sig_num = static_cast<int64_t>(signal);
         if (callback_.isCallable())
-            Future::coroutine(callback_(this, sig_num, argument_, static_cast<int64_t>(error.value())));
-        return sig_num;
+            Future::coroutine(callback_(this, signal, error.value(), argument_));
+        return signal;
     }
 
     Future* Signal::wait()
     {
-        auto future = new Future();
+        auto future = Future::add();
         future->on_resolve<int>(boost::bind(&Signal::handler, this, _1, _2));
         signal_.async_wait(ASYNC_HANDLER_DOUBLE_ARG(int));
         return future;
@@ -33,20 +32,16 @@ namespace Asio
     {
         if (cancelled_)
             throw Php::Exception("Trying to add signal to a cancelled signal set.");
-        return add({ params.begin(), params.end() });
-    }
-
-    int64_t Signal::add(const std::vector<Php::Value>&& signals)
-    {
         boost::system::error_code ec;
-        for (const auto& param : signals) {
+        for (const auto& param : params) {
             if (!param.isNumeric())
                 throw Php::Exception("Integer value expected.");
             auto signal = param.numericValue();
             signal_.add(static_cast<int>(signal), ec);
-            if (ec) break;
+            if (ec)
+                break;
         }
-        return static_cast<int64_t>(ec.value());
+        return ec.value();
     }
 
     Php::Value Signal::remove(Php::Parameters& params)
@@ -59,9 +54,10 @@ namespace Asio
                 throw Php::Exception("Integer value expected.");
             auto signal = param.numericValue();
             signal_.remove(static_cast<int>(signal));
-            if (ec) break;
+            if (ec)
+                break;
         }
-        return static_cast<int64_t>(ec.value());
+        return ec.value();
     }
 
     Php::Value Signal::wait(Php::Parameters& params)
@@ -80,7 +76,7 @@ namespace Asio
             throw Php::Exception("Trying to clear a cancelled signal set.");
         boost::system::error_code ec;
         signal_.clear(ec);
-        return static_cast<int64_t>(ec.value());
+        return ec.value();
     }
 
     Php::Value Signal::cancel()
@@ -93,6 +89,6 @@ namespace Asio
             cancelled_ = true;
             delete wrapper_;
         }
-        return static_cast<int64_t>(ec.value());
+        return ec.value();
     }
 }

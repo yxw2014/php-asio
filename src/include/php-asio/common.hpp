@@ -1,5 +1,5 @@
 /**
- * php-asio/include/php-asio/common.hpp
+ * php-asio/include/common.hpp
  *
  * @author CismonX<admin@cismon.net>
  */
@@ -19,3 +19,7 @@
     boost::bind(&Future::resolve<NOARG>, future, boost::asio::placeholders::error, 0))
 #define ASYNC_HANDLER_DOUBLE_ARG(type) std::function<void(const boost::system::error_code&, type)>( \
     boost::bind(&Future::resolve<type>, future, boost::asio::placeholders::error, _2))
+
+using boost::asio::ip::tcp;
+using boost::asio::ip::udp;
+using unix = boost::asio::local::stream_protocol;

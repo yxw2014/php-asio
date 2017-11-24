@@ -1,5 +1,5 @@
 /**
- * php-asio/include/php-asio/signal.hpp
+ * php-asio/include/signal.hpp
  *
  * @author CismonX<admin@cismon.net>
  */
@@ -30,11 +30,6 @@ namespace Asio
          * Async wait.
          */
         Future* wait();
-
-        /**
-         * Internal method for adding signals.
-         */
-        int64_t add(const std::vector<Php::Value>&& signals);
 
     public:
         /**

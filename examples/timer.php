@@ -5,27 +5,21 @@
  * @author CismonX<admin@cismon.net>
  */
 
-$service = new Asio\Service();
+$service = new Asio\Service;
 $timer = $service->addTimer();
 $timer->expire(1000);
-$timer->wait(function (Asio\Timer $timer, $arg, $ec) use ($service) {
-    if ($ec)
-        return;
-    $counter = 0;
-    while (1) {
-        // Using extra argument.
+$timer->wait(
+    $timer_cb = function (Asio\Timer $timer, $ec, $arg) use ($service, &$timer_cb) {
+        if ($ec)
+            return;
+        static $counter = 0;
         echo $arg, PHP_EOL;
         if (++$counter >= 5) {
             $timer->cancel();
             return;
-        } else {
-            // Using timestamp.
-            $timer->expire(round(1000 * (microtime(true) + 1)), true);
-            // Using coroutine.
-            yield $timer->wait();
-            if (Asio\lastError())
-                return;
         }
-    }
-}, 'Tick.');
+        // Using timestamp.
+        $timer->expire(round(1000 * (microtime(true) + 1)), true);
+        $timer->wait($timer_cb, 'Tick.');
+    }, 'Tick.');
 $service->run();

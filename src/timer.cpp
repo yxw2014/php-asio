@@ -10,7 +10,7 @@ namespace Asio
 {
     Future* Timer::wait()
     {
-        auto future = new Future();
+        auto future = Future::add();
         future->on_resolve<NOARG>(boost::bind(&Timer::handler, this, _1));
         timer_.async_wait(ASYNC_HANDLER_SINGLE_ARG);
         return future;
@@ -19,7 +19,7 @@ namespace Asio
     Php::Value Timer::handler(const boost::system::error_code& error)
     {
         if (callback_.isCallable())
-            Future::coroutine(callback_(this, argument_, static_cast<int64_t>(error.value())));
+            Future::coroutine(callback_(this, error.value(), argument_));
         return Php::Value();
     }
 

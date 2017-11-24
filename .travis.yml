@@ -17,4 +17,4 @@ install:
   - cd PHP-CPP && make && sudo make install && cd ..
 
 script:
-  - make && make install
+  - make release && make install

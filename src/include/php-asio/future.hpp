@@ -1,5 +1,5 @@
 /**
- * php-asio/include/php-asio/future.hpp
+ * php-asio/include/future.hpp
  *
  * @author CismonX<admin@cismon.net>
  */
@@ -8,7 +8,7 @@
 
 #include "common.hpp"
 
-#define ASYNC_CALLBACK(type) std::function<Php::Value(const boost::system::error_code, type)>
+#define ASYNC_CALLBACK(type) std::function<Php::Value(const boost::system::error_code&, type)>
 
 namespace Asio
 {
@@ -49,11 +49,20 @@ namespace Asio
          */
         Php::Object* wrapper_;
 
-    public:
         /**
-         * Constructor.
+         * Make default constructor private to avoid user instantiation.
          */
         explicit Future();
+
+    public:
+
+        /**
+         * Create a new Future instance.
+         */
+        static Future* add()
+        {
+            return new Future;
+        }
 
         /**
          * Deleted copy constructor.
@@ -92,6 +101,9 @@ namespace Asio
         /**
          * Get last error emitted by handler callback within yielded Future.
          */
-        static Php::Value get_last_error();
+        static Php::Value get_last_error()
+        {
+            return last_error_;
+        }
     };
 }
