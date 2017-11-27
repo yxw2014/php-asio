@@ -8,6 +8,9 @@
 
 #include "common.hpp"
 
+/**
+ * A base class for all IO objects.
+ */
 namespace Asio
 {
     class Base : public Php::Base
@@ -65,5 +68,6 @@ namespace Asio
          * Destructor.
          */
         virtual ~Base() = default;
+
     };
 }

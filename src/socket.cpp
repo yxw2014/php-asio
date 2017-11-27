@@ -239,21 +239,21 @@ namespace Asio
 
     // Instantiation for TcpSocket.
     template class Socket<tcp>;
-    template Php::Value Socket<tcp>::open_inet(Php::Parameters&);
-    template Php::Value Socket<tcp>::read(Php::Parameters&);
-    template Php::Value Socket<tcp>::read_handler(const boost::system::error_code&, size_t, std::vector<uint8_t>*);
-    template Php::Value Socket<tcp>::write(Php::Parameters&);
-    template Php::Value Socket<tcp>::write_handler(const boost::system::error_code&, size_t, std::string*);
-    template Future* Socket<tcp>::read(int64_t, bool);
-    template Future* Socket<tcp>::write(const std::string&, bool);
+    template Php::Value TcpSocket::open_inet(Php::Parameters&);
+    template Php::Value TcpSocket::read(Php::Parameters&);
+    template Php::Value TcpSocket::read_handler(const boost::system::error_code&, size_t, std::vector<uint8_t>*);
+    template Php::Value TcpSocket::write(Php::Parameters&);
+    template Php::Value TcpSocket::write_handler(const boost::system::error_code&, size_t, std::string*);
+    template Future* TcpSocket::read(int64_t, bool);
+    template Future* TcpSocket::write(const std::string&, bool);
 
     // Instantiation for UnixSocket.
     template class Socket<unix>;
-    template Php::Value Socket<unix>::open_local();
-    template Php::Value Socket<unix>::read(Php::Parameters&);
-    template Php::Value Socket<unix>::read_handler(const boost::system::error_code&, size_t, std::vector<uint8_t>*);
-    template Php::Value Socket<unix>::write(Php::Parameters&);
-    template Php::Value Socket<unix>::write_handler(const boost::system::error_code&, size_t, std::string*);
-    template Future* Socket<unix>::read(int64_t, bool);
-    template Future* Socket<unix>::write(const std::string&, bool);
+    template Php::Value UnixSocket::open_local();
+    template Php::Value UnixSocket::read(Php::Parameters&);
+    template Php::Value UnixSocket::read_handler(const boost::system::error_code&, size_t, std::vector<uint8_t>*);
+    template Php::Value UnixSocket::write(Php::Parameters&);
+    template Php::Value UnixSocket::write_handler(const boost::system::error_code&, size_t, std::string*);
+    template Future* UnixSocket::read(int64_t, bool);
+    template Future* UnixSocket::write(const std::string&, bool);
 }

@@ -116,6 +116,13 @@ extern "C" PHPCPP_EXPORT void* get_module()
         Php::ByVal("callback", Php::Type::Callable),
         Php::ByVal("argument", Php::Type::Null, false)
     });
+    service.method<&Service::dispatch>("dispatch", {
+        Php::ByVal("callback", Php::Type::Callable),
+        Php::ByVal("argument", Php::Type::Null, false)
+    });
+    service.method<&Service::notify_fork>("notifyFork", {
+        Php::ByVal("is_parent", Php::Type::Bool, false)
+    });
     asio.add(std::move(service));
 
     // Class Asio\Future.
@@ -269,7 +276,7 @@ extern "C" PHPCPP_EXPORT void* get_module()
     });
     asio.add(std::move(udp_resolver));
 
-    //Class Asio\Signal.
+    // Class Asio\Signal.
     Php::Class<Signal> signal("Asio\\Signal", Php::Final);
     signal.method<&Signal::add>("add");
     signal.method<&Signal::wait>("wait", {

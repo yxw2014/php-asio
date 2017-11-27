@@ -64,22 +64,22 @@ namespace Asio
         Php::Value open_local();
 
         /**
-         * Bind acceptor to a local endpoint.
+         * Bind the acceptor to the specified local endpoint.
          */
         Php::Value bind(Php::Parameters&);
 
         /**
-         * Acceptor start listening so that it could accept connections.
+         * Put the acceptor into the state where it may accept new connections.
          */
         Php::Value listen(Php::Parameters&);
 
         /**
-         * Accept incoming client connection.
+         * Asynchronously accept a new connection into a socket.
          */
         Php::Value accept(Php::Parameters&);
 
         /**
-         * Cancel async operations and stop Acceptor.
+         * Cancel async operations and stop acceptor.
          */
         Php::Value stop();
 

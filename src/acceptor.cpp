@@ -112,9 +112,9 @@ namespace Asio
 
     // Instantiation for TCP acceptor.
     template class Acceptor<tcp>;
-    template Php::Value Acceptor<tcp>::open_inet(Php::Parameters&);
+    template Php::Value TcpAcceptor::open_inet(Php::Parameters&);
 
     // Instantiation for UNIX domain socket acceptor.
     template class Acceptor<unix>;
-    template Php::Value Acceptor<unix>::open_local();
+    template Php::Value UnixAcceptor::open_local();
 }

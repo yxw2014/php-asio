@@ -119,7 +119,7 @@ namespace Asio
         Php::Value open_local();
 
         /**
-         * Bind to a local endpoint.
+         * Bind socket to a local endpoint.
          */
         Php::Value bind(Php::Parameters&);
 

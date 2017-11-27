@@ -56,7 +56,7 @@ namespace Asio
         virtual ~Resolver() = default;
 
         /**
-         * Start an asynchronous resolve operation
+         * Initiate an asynchronous resolve against the resolver.
          */
         Php::Value resolve(Php::Parameters&);
 

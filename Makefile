@@ -19,11 +19,11 @@ OBJECTS             =   $(SOURCES:%.cpp=%.o)
 
 HEADER_DIR          =   /usr/local/include
 
-all: COMPILER_FLAGS += -g -Og
+all: COMPILER_FLAGS += -O2 -s
 all: ${OBJECTS} ${EXTENSION}
 
-release: COMPILER_FLAGS += -O2 -s
-release: ${OBJECTS} ${EXTENSION}
+debug: COMPILER_FLAGS += -g -Og
+debug: ${OBJECTS} ${EXTENSION}
 
 ${EXTENSION}: ${OBJECTS}
 	${LINKER} ${LINKER_FLAGS} -o $@ ${OBJECTS} ${LINKER_DEPENDENCIES}

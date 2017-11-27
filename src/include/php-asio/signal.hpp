@@ -12,6 +12,10 @@
 
 namespace Asio
 {
+    /**
+     * Wrapper for Boost.Asio signal_set.
+     * Provides functionalities for signal handling.
+     */
     class Signal : public Base
     {
         /**
@@ -27,7 +31,7 @@ namespace Asio
         Php::Value handler(const boost::system::error_code& error, int signal);
 
         /**
-         * Async wait.
+         * The internal wait mathod.
          */
         Future* wait();
 
@@ -39,32 +43,32 @@ namespace Asio
         explicit Signal(boost::asio::io_service& io_service);
 
         /**
-         * Destructor.
+         * Default destructor.
          */
         virtual ~Signal() = default;
 
         /**
-         * Add signal numbers.
+         * Add the specified signal(s) to the signal set.
          */
         Php::Value add(Php::Parameters&);
 
         /**
-         * Remove signals.
+         * Remove the specified signal(s) from the signal set.
          */
         Php::Value remove(Php::Parameters&);
 
         /**
-         * Wait for a signal.
+         * Initiate an asynchronous wait against the signal set.
          */
         Php::Value wait(Php::Parameters&);
 
         /**
-         * Remove all signals.
+         * Remove all signals from the signal set.
          */
         Php::Value clear();
 
         /**
-         * Cancel current signal handler.
+         * Cancel current signal set.
          */
         Php::Value cancel();
 

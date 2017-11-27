@@ -17,56 +17,56 @@ namespace Asio;
 class Service
 {
     /**
-     * Add Timer.
+     * Add a new timer.
      *
      * @return Timer
      */
     function addTimer() {}
 
     /**
-     * Add TCP acceptor.
+     * Add a new TCP acceptor.
      *
      * @return TcpAcceptor
      */
     function addTcpAcceptor() {}
 
     /**
-     * Add UNIX stream socket acceptor.
+     * Add a new UNIX domain socket acceptor (SOCK_STREAM).
      *
      * @return UnixAcceptor
      */
     function addUnixAcceptor() {}
 
     /**
-     * Resolve TCP-based services.
+     * Add a TCP resolver.
      *
      * @return TcpResolver
      */
     function addTcpResolver() {}
 
     /**
-     * Resolve UDP-based services.
+     * Add a UDP resolver.
      *
      * @return UdpResolver
      */
     function addUdpResolver() {}
 
     /**
-     * Add a TCP socket.
+     * Add a new TCP socket.
      *
      * @return TcpSocket
      */
     function addTcpSocket() {}
 
     /**
-     * Add a UNIX domain socket (SOCK_STREAM).
+     * Add a new UNIX domain socket (SOCK_STREAM).
      *
      * @return UnixSocket
      */
     function addUnixSocket() {}
 
     /**
-     * Add signal handler.
+     * Add new signal set.
      *
      * @throws \Exception
      * @return Signal
@@ -74,7 +74,7 @@ class Service
     function addSignal() {}
 
     /**
-     * Run event loop(blocked).
+     * Run the event loop until stopped or no more work.
      *
      * @param int $ec[optional] : Error code
      * @return int : the number of handlers executed
@@ -82,7 +82,7 @@ class Service
     function run(int &$ec) {}
 
     /**
-     * Execute at most one handler in event loop(blocked).
+     * Run until stopped or one operation is performed.
      *
      * @param int $ec[optional] : Error code
      * @return int : the number of handlers executed
@@ -90,7 +90,7 @@ class Service
     function runOne(int &$ec) {}
 
     /**
-     * Run event loop(not blocked).
+     * Poll for operations without blocking.
      *
      * @param int $ec[optional] : Error code
      * @return int : the number of handlers executed
@@ -98,7 +98,7 @@ class Service
     function poll(int &$ec) {}
 
     /**
-     * Execute at most one handler in event loop(not blocked).
+     * Poll for one operation without blocking.
      *
      * @param int $ec[optional] : Error code
      * @return int : the number of handlers executed
@@ -106,18 +106,55 @@ class Service
     function pollOne(int &$ec) {}
 
     /**
-     * Execute the given callback the next tick.
+     * Request invocation of the given handler and return immediately.
      *
      * @param callable $callback
      * @param mixed $argument
      * @return int : the number of handlers executed
      */
     function post(callable $callback, $argument = null) {}
+
+    /**
+     * Request invocation of the given handler.
+     *
+     * @param callable $callback
+     * @param mixed $argument
+     * @return int : the number of handlers executed
+     */
+    function dispatch(callable $callback, $argument = null) {}
+
+    /**
+     * Notify all services of a fork event.
+     *
+     * @param bool $is_parent[optional] : Empty for `fork_prepare`
+     * @throws \Error : Throws fatal error when an error occurs
+     * @return void
+     */
+    function notify_fork(bool $is_parent) {}
+
+    /**
+     * Stop the event processing loop.
+     *
+     * @return void
+     */
+    function stop() {}
+
+    /**
+     * Reset in preparation for a subsequent run invocation.
+     *
+     * @return void
+     */
+    function reset() {}
+
+    /**
+     * Determine whether the io_service is stopped.
+     */
+    function stopped() {}
 }
 
 /**
- * Returned by asynchronous operations, and resolves upon operation completion.
- * If yielded, future resolution will also resume the generator.
+ * When an asynchronous operation completes, its Future will be resolved.
+ * And the corresponding coroutine will resume (if Future was yielded by a Generator).
  *
  * @package Asio
  */
@@ -131,7 +168,6 @@ final class Future
 
 /**
  * Wrapper for Boost.Asio deadline timer.
- * The timer object will be destroyed when timer is no longer deferred.
  *
  * @package Asio
  */
@@ -152,7 +188,7 @@ final class Timer
     function expire(int $time, bool $use_timestamp = false) {}
 
     /**
-     * Wait for timer to expire.
+     * Initiate an asynchronous wait against the timer.
      *
      * @param callable $callback[optional]
      * @param mixed $argument
@@ -209,7 +245,7 @@ interface Socket
 interface StreamSocket extends Socket
 {
     /**
-     * Asynchronously read from the stream socket.
+     * Read asynchronously from stream socket.
      *
      * @param int $length : Max number of bytes to be read
      * @param bool $read_some
@@ -221,7 +257,7 @@ interface StreamSocket extends Socket
     function read(int $length, bool $read_some = true, callable $callback, $argument = null);
 
     /**
-     * Asynchronously write to the stream socket.
+     * Write asynchronously to stream socket.
      *
      * @param string $data : Write buffer
      * @param bool $write_some
@@ -249,7 +285,7 @@ interface InetSocket extends Socket
     function open(bool $use_ipv6);
 
     /**
-     * Bind socket to an endpoint.
+     * Bind socket to a local endpoint.
      *
      * @param string $address
      * @param int $port
@@ -287,7 +323,7 @@ interface LocalSocket extends Socket
     function open();
 
     /**
-     * Bind socket to an endpoint.
+     * Bind socket to a local endpoint.
      *
      * @param string $path : Path to socket file
      * @return mixed
@@ -310,24 +346,25 @@ interface LocalSocket extends Socket
 interface Acceptor
 {
     /**
+     * Put the acceptor into the state where it may accept new connections.
+     *
      * @param int $backlog[optional] : The maximum length of the queue of pending connections.
-     *                                 Default to boost::asio::socket_base::max_connections.
-     * @return mixed
+     *                                 Default to `boost::asio::socket_base::max_connections`.
+     * @return int : Error code
      */
     function listen(int $backlog);
 
     /**
-     * Accept incoming client connection once.
+     * Asynchronously accept a new connection into a socket.
      *
      * @param callable $callback[optional] : Acceptor callback
      * @param mixed $argument
-     * @throws \Exception
      * @return Future : Resolves Socket.
      */
     function accept(callable $callback, $argument = null);
 
     /**
-     * Stop server and cancel all async operations related to it.
+     * Cancel async operations and stop acceptor.
      *
      * @return int : Error code
      */
@@ -342,7 +379,7 @@ interface Acceptor
 interface Resolver
 {
     /**
-     * Start async resolve.
+     * Initiate an asynchronous resolve against the resolver.
      *
      * @param string $host : Host name
      * @param string $service
@@ -361,7 +398,7 @@ interface Resolver
 final class TcpAcceptor implements Acceptor
 {
     /**
-     * This class can only be instantiated using "Service::addTcpServer()".
+     * This class can only be instantiated using `Service::addTcpAcceptor()`.
      */
     private function __construct() {}
 
@@ -406,7 +443,7 @@ final class TcpAcceptor implements Acceptor
 final class UnixAcceptor implements Acceptor
 {
     /**
-     * This class can only be instantiated using "Service::addUnixServer()".
+     * This class can only be instantiated using `Service::addUnixAcceptor()`.
      */
     private function __construct() {}
 
@@ -449,7 +486,7 @@ final class UnixAcceptor implements Acceptor
 final class TcpSocket implements StreamSocket, InetSocket
 {
     /**
-     * This class can only be instantiated by TcpServer.
+     * This class can only be instantiated using `Service::addTcpSocket()` and `TcpAcceptor::Accept()`.
      */
     private function __construct() {}
 
@@ -517,7 +554,7 @@ final class TcpSocket implements StreamSocket, InetSocket
 final class UnixSocket implements StreamSocket, LocalSocket
 {
     /**
-     * This class can only be instantiated by UnixServer.
+     * This class can only be instantiated using `Service::addUnixSocket()` and `UnixAcceptor::Accept()`.
      */
     private function __construct() {}
 
@@ -580,7 +617,7 @@ final class UnixSocket implements StreamSocket, LocalSocket
 final class TcpResolver implements Resolver
 {
     /**
-     * This class can only be instantiated using "Service::addTcpResolver()".
+     * This class can only be instantiated using `Service::addTcpResolver()`.
      */
     private function __construct() {}
 
@@ -598,7 +635,7 @@ final class TcpResolver implements Resolver
 final class UdpResolver implements Resolver
 {
     /**
-     * This class can only be instantiated using "Service::addTcpResolver()".
+     * This class can only be instantiated using `Service::addTcpResolver()`.
      */
     private function __construct() {}
 
@@ -616,12 +653,12 @@ final class UdpResolver implements Resolver
 final class Signal
 {
     /**
-     * This class can only be instantiated using "Service::addSignal()".
+     * This class can only be instantiated using `Service::addSignal()`.
      */
     private function __construct() {}
 
     /**
-     * Add signals.
+     * Add the specified signal(s) to the signal set.
      *
      * @param int[] ...$signals[optional]
      * @throws \Exception
@@ -630,7 +667,7 @@ final class Signal
     function add(int... $signals) {}
 
     /**
-     * Wait for a signal.
+     * Initiate an asynchronous wait against the signal set.
      *
      * @param callable $callback[optional]
      * @param mixed $argument
@@ -639,7 +676,7 @@ final class Signal
     function wait(callable $callback, $argument = null) {}
 
     /**
-     * Remove signals.
+     * Remove the specified signal(s) from the signal set.
      *
      * @param int[] ...$signals[optional]
      * @throws \Exception
@@ -648,7 +685,7 @@ final class Signal
     function remove(int... $signals) {}
 
     /**
-     * Remove all signals.
+     * Remove all signals from the signal set.
      *
      * @throws \Exception
      * @return int : Error code
@@ -656,7 +693,7 @@ final class Signal
     function clear() {}
 
     /**
-     * Cancel signal handler.
+     * Cancel current signal set.
      *
      * @throws \Exception
      * @return int : Error code

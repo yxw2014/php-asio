@@ -51,7 +51,7 @@ namespace Asio
         Php::Value expire(Php::Parameters& params);
 
         /**
-         * Wait for timer to expire.
+         * Initiate an asynchronous wait against the timer.
          */
         Php::Value wait(Php::Parameters& params);
 

@@ -103,7 +103,7 @@ namespace Asio
         }
 
         /**
-         * Add new signal handler.
+         * Add new signal set.
          */
         Php::Value add_signal()
         {
@@ -111,7 +111,7 @@ namespace Asio
         }
 
         /**
-         * Start event loop in block mode.
+         * Run the event loop until stopped or no more work.
          */
         Php::Value run(Php::Parameters& params)
         {
@@ -123,7 +123,7 @@ namespace Asio
         }
 
         /**
-         * Excecute at most one handler within the event loop in block mode.
+         * Run until stopped or one operation is performed.
          */
         Php::Value run_one(Php::Parameters& params)
         {
@@ -135,7 +135,7 @@ namespace Asio
         }
 
         /**
-         * Start event loop in non-block mode.
+         * Poll for operations without blocking.
          */
         Php::Value poll(Php::Parameters& params)
         {
@@ -147,7 +147,7 @@ namespace Asio
         }
 
         /**
-         * Excecute at most one handler within the event loop in non-block mode.
+         * Poll for one operation without blocking.
          */
         Php::Value poll_one(Php::Parameters& params)
         {
@@ -159,7 +159,7 @@ namespace Asio
         }
 
         /**
-         * Cancel all pending handlers within the event loop.
+         * Stop the event processing loop.
          */
         void stop()
         {
@@ -167,7 +167,7 @@ namespace Asio
         }
 
         /**
-         * Reset the io_service before start it again.
+         * Reset in preparation for a subsequent run invocation.
          */
         void reset()
         {
@@ -175,7 +175,7 @@ namespace Asio
         }
 
         /**
-         * Check whether the event loop has stopped.
+         * Determine whether the io_service is stopped.
          */
         Php::Value stopped() const
         {
@@ -183,7 +183,7 @@ namespace Asio
         }
 
         /**
-         * Execute a given callback with argument at the next tick.
+         * Request invocation of the given handler and return immediately.
          */
         void post(Php::Parameters& params)
         {
@@ -193,6 +193,32 @@ namespace Asio
             {
                 Future::coroutine(callback(argument));
             });
+        }
+
+        /**
+         * Request invocation of the given handler.
+         */
+        void dispatch(Php::Parameters& params)
+        {
+            auto callback = params[0];
+            auto argument = params.size() == 1 ? Php::Value() : params[1];
+            io_service_.dispatch([callback, argument]()
+            {
+                Future::coroutine(callback(argument));
+            });
+        }
+
+        /**
+         * Notify all services of a fork event.
+         */
+        void notify_fork(Php::Parameters& params)
+        {
+            try {
+                io_service_.notify_fork(params.size() ? (params[0].boolValue() ?
+                    boost::asio::io_service::fork_parent : boost::asio::io_service::fork_child) : boost::asio::io_service::fork_prepare);
+            } catch (const boost::system::system_error& err) {
+                throw Php::FatalError(std::string("Failed to notify fork. Error code: ") + std::to_string(err.code().value()));
+            }
         }
 
         /**
