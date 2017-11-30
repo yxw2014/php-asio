@@ -38,7 +38,7 @@ namespace Asio
     public:
         /**
          * Constructor.
-         * @param io_service : IO service for current signal handler
+         * @param io_service : I/O service for current signal set
          */
         explicit Signal(boost::asio::io_service& io_service);
 

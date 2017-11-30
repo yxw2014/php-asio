@@ -9,8 +9,7 @@ $service = new Asio\Service;
 $acceptor = $service->addTcpAcceptor();
 $acceptor->open(true);
 // Unlike that of PHP (`stream_socket_server()`), IPv6 addresses should not be put between a pair of brackets.
-$ec = $acceptor->bind('::', 8081);
-if ($ec) {
+if ($ec = $acceptor->bind('::', 8081)) {
     echo 'Bind failed. ', posix_strerror($ec), PHP_EOL;
     return;
 }
@@ -37,7 +36,7 @@ $acceptor->accept(
                 echo 'Client sent: ', trim($data), PHP_EOL;
                 //Socket write resolves number of bytes transferred.
                 $bytes_transferred = yield $socket->write('Server received: ' . trim($data) . PHP_EOL, false);
-                if ($ec = Asio\lastError()) {
+                if ($ec = Asio\Service::lastError()) {
                     echo 'Write fail. ', posix_strerror($ec), PHP_EOL;
                     $socket->close();
                     return;
@@ -48,8 +47,7 @@ $acceptor->accept(
     });
 $acceptor = $service->addUnixAcceptor();
 $acceptor->open();
-$ec = $acceptor->bind('/tmp/test.sock');
-if ($ec) {
+if ($ec = $acceptor->bind('/tmp/test.sock')) {
     echo 'Bind failed. ', posix_strerror($ec), PHP_EOL;
     return;
 }

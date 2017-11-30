@@ -7,7 +7,7 @@
 
 This extension is, to some extent, a PHP wrapper for the Boost.Asio library, hence the name php-asio.
 
-The extension provides a high-performance event-driven model for networking, which makes asynchronous and concurrency simple.
+It provides a high-performance event-driven model for networking, which makes asynchronous and concurrency simple.
 
 Now php-asio is **in development**, do not use it in production.
 
@@ -30,6 +30,8 @@ Bug reports and pull requests are welcome.
 
 ## 3. Documentation
 
-Full documentation can be found within [stub.php](stub.php). With it, you can also enable code hinting for this library in your IDE to make your life easier.
+Signatures of classes and functions of php-asio can be found within [stubs/](stubs/) directory, with PHPDoc.
 
 There are also some examples in the [examples/](examples/) directory.
+
+A detailed documentation will be coming soon once the first stable version is released.

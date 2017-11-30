@@ -42,7 +42,7 @@ namespace Asio
     public:
         /**
          * Constructor.
-         * @param io_service : IO service for current Acceptor.
+         * @param io_service : I/O service for current Acceptor.
          */
         explicit Acceptor(boost::asio::io_service& io_service);
 

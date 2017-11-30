@@ -55,7 +55,6 @@ namespace Asio
         explicit Future();
 
     public:
-
         /**
          * Create a new Future instance.
          */
@@ -105,5 +104,6 @@ namespace Asio
         {
             return last_error_;
         }
+
     };
 }

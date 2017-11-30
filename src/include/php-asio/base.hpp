@@ -9,7 +9,7 @@
 #include "common.hpp"
 
 /**
- * A base class for all IO objects.
+ * A base class for all I/O objects.
  */
 namespace Asio
 {
@@ -44,7 +44,7 @@ namespace Asio
 
         /**
          * Constructor.
-         * @param io_service : IO service for current object
+         * @param io_service : I/O service for current object
          */
         explicit Base(boost::asio::io_service& io_service);
 

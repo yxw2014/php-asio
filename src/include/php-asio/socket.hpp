@@ -92,7 +92,7 @@ namespace Asio
     public:
         /**
          * Constructor.
-         * @param io_service : IO service of current TCP socket.
+         * @param io_service : I/O service of current socket.
          */
         explicit Socket(boost::asio::io_service& io_service);
 

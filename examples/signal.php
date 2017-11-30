@@ -11,7 +11,7 @@ $service->post(function () use ($service) {
     $signal = $service->addSignal();
     $signal->add(SIGINT, SIGTERM);
     $sig_num = yield $signal->wait();
-    if (Asio\lastError()) {
+    if (Asio\Service::lastError()) {
         $signal->cancel();
         return;
     }

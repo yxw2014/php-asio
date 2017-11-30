@@ -15,13 +15,13 @@
 namespace Asio
 {
     /**
-     * Wrapper for Boost.Asio IO service.
-     * Provide access to instantiation of IO objects.
+     * Wrapper for Boost.Asio io_service.
+     * Provide access to instantiation of I/O objects.
      */
     class Service : public Php::Base
     {
         /**
-         * The io_service of all IO objects in current instance.
+         * The io_service of all I/O objects in current instance.
          */
         boost::asio::io_service io_service_;
 
@@ -211,14 +211,15 @@ namespace Asio
         /**
          * Notify all services of a fork event.
          */
-        void notify_fork(Php::Parameters& params)
+        Php::Value notify_fork(Php::Parameters& params)
         {
             try {
                 io_service_.notify_fork(params.size() ? (params[0].boolValue() ?
                     boost::asio::io_service::fork_parent : boost::asio::io_service::fork_child) : boost::asio::io_service::fork_prepare);
             } catch (const boost::system::system_error& err) {
-                throw Php::FatalError(std::string("Failed to notify fork. Error code: ") + std::to_string(err.code().value()));
+                return err.code().value();
             }
+            return 0;
         }
 
         /**

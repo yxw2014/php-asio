@@ -36,7 +36,7 @@ namespace Asio
     public:
         /**
          * Timer constructor.
-         * @param io_service : IO service for current timer
+         * @param io_service : I/O service for current timer
          */
         explicit Timer(boost::asio::io_service& io_service);
 

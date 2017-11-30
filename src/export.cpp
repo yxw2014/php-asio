@@ -11,7 +11,6 @@ using namespace Asio;
 extern "C" PHPCPP_EXPORT void* get_module()
 {
     static Php::Extension asio("asio", "1.0");
-    asio.add<&Future::get_last_error>("Asio\\lastError");
 
     // Interface Asio\Socket.
     Php::Interface socket("Asio\\Socket");
@@ -85,6 +84,7 @@ extern "C" PHPCPP_EXPORT void* get_module()
         Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false)
     });
+    resolver.method("cancel");
     asio.add(std::move(resolver));
 
     // Class Asio\Service.
@@ -123,6 +123,7 @@ extern "C" PHPCPP_EXPORT void* get_module()
     service.method<&Service::notify_fork>("notifyFork", {
         Php::ByVal("is_parent", Php::Type::Bool, false)
     });
+    service.method<&Future::get_last_error>("lastError");
     asio.add(std::move(service));
 
     // Class Asio\Future.
@@ -263,6 +264,7 @@ extern "C" PHPCPP_EXPORT void* get_module()
         Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false)
     });
+    tcp_resolver.method<&TcpResolver::cancel>("cancel");
     asio.add(std::move(tcp_resolver));
 
     // Class Asio\UdpResolver.
@@ -274,6 +276,7 @@ extern "C" PHPCPP_EXPORT void* get_module()
         Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false)
     });
+    udp_resolver.method<&UdpResolver::cancel>("cancel");
     asio.add(std::move(udp_resolver));
 
     // Class Asio\Signal.

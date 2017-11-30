@@ -46,7 +46,7 @@ namespace Asio
     public:
         /**
          * Constructor.
-         * @param io_service : IO service for current Resolver.
+         * @param io_service : I/O service for current Resolver.
          */
         explicit Resolver(boost::asio::io_service& io_service);
 
