@@ -30,15 +30,25 @@ extern "C" PHPCPP_EXPORT void* get_module()
         Php::ByVal("length", Php::Type::Numeric),
         Php::ByVal("read_some", Php::Type::Bool, false),
         Php::ByVal("callback", Php::Type::Callable, false),
-        Php::ByVal("argument", Php::Type::Null, false),
+        Php::ByVal("argument", Php::Type::Null, false)
     });
     stream_socket.method("write", {
         Php::ByVal("data", Php::Type::String),
         Php::ByVal("write_some", Php::Type::Bool, false),
         Php::ByVal("callback", Php::Type::Callable, false),
-        Php::ByVal("argument", Php::Type::Null, false),
+        Php::ByVal("argument", Php::Type::Null, false)
     });
     asio.add(std::move(stream_socket));
+
+    // Interface Asio\DatagramSocket.
+    Php::Interface datagram_socket("Asio\\DatagramSocket");
+    datagram_socket.extends(socket);
+    datagram_socket.method("recvFrom", {
+        Php::ByVal("length", Php::Type::Numeric),
+        Php::ByVal("callback", Php::Type::Callable, false),
+        Php::ByVal("argument", Php::Type::Null, false)
+    });
+    asio.add(std::move(datagram_socket));
 
     // Interface Asio\InetSocket.
     Php::Interface inet_socket("Asio\\InetSocket");
@@ -95,7 +105,9 @@ extern "C" PHPCPP_EXPORT void* get_module()
     service.method<&Service::add_tcp_resolver>("addTcpResolver");
     service.method<&Service::add_udp_resolver>("addUdpResolver");
     service.method<&Service::add_tcp_socket>("addTcpSocket");
+    service.method<&Service::add_udp_socket>("addUdpSocket");
     service.method<&Service::add_unix_socket>("addUnixSocket");
+    service.method<&Service::add_udg_socket>("addUdgSocket");
     service.method<&Service::add_signal>("addSignal");
     service.method<&Service::run>("run", {
         Php::ByRef("ec", Php::Type::Null, false)
@@ -123,7 +135,9 @@ extern "C" PHPCPP_EXPORT void* get_module()
     service.method<&Service::notify_fork>("notifyFork", {
         Php::ByVal("is_parent", Php::Type::Bool, false)
     });
+#if ENABLE_COROUTINE
     service.method<&Future::get_last_error>("lastError");
+#endif
     asio.add(std::move(service));
 
     // Class Asio\Future.
@@ -205,7 +219,7 @@ extern "C" PHPCPP_EXPORT void* get_module()
         Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false),
     });
-    tcp_socket.method<&TcpSocket::bind>("bind", {
+    tcp_socket.method<&TcpSocket::bind_inet>("bind", {
         Php::ByVal("address", Php::Type::String),
         Php::ByVal("port", Php::Type::Numeric)
     });
@@ -219,6 +233,40 @@ extern "C" PHPCPP_EXPORT void* get_module()
     });
     tcp_socket.method<&TcpSocket::close>("close");
     asio.add(std::move(tcp_socket));
+
+    //Class Asio\UdpSocket.
+    Php::Class<UdpSocket> udp_socket("Asio\\UdpSocket", Php::Final);
+    udp_socket.implements(datagram_socket);
+    udp_socket.implements(inet_socket);
+    udp_socket.method<&UdpSocket::open_inet>("open", {
+        Php::ByVal("use_ipv6", Php::Type::Bool)
+    });
+    udp_socket.method<&UdpSocket::recv_from>("recvFrom", {
+        Php::ByVal("length", Php::Type::Numeric),
+        Php::ByVal("callback", Php::Type::Callable, false),
+        Php::ByVal("argument", Php::Type::Null, false)
+    });
+    udp_socket.method<&UdpSocket::send_to>("sendTo", {
+        Php::ByVal("data", Php::Type::String),
+        Php::ByVal("address", Php::Type::String),
+        Php::ByVal("port", Php::Type::Numeric),
+        Php::ByVal("callback", Php::Type::Callable, false),
+        Php::ByVal("argument", Php::Type::Null, false)
+    });
+    udp_socket.method<&UdpSocket::bind_inet>("bind", {
+        Php::ByVal("address", Php::Type::String),
+        Php::ByVal("port", Php::Type::Numeric)
+    });
+    udp_socket.method<&UdpSocket::remote_addr>("remoteAddr");
+    udp_socket.method<&UdpSocket::remote_port>("remotePort");
+    udp_socket.method<&UdpSocket::available>("available", {
+        Php::ByRef("ec", Php::Type::Null, false)
+    });
+    udp_socket.method<&UdpSocket::at_mark>("atMark", {
+        Php::ByRef("ec", Php::Type::Null, false)
+    });
+    udp_socket.method<&UdpSocket::close>("close");
+    asio.add(std::move(udp_socket));
 
     // Class Asio\UnixSocket.
     Php::Class<UnixSocket> unix_socket("Asio\\UnixSocket", Php::Final);
@@ -242,7 +290,7 @@ extern "C" PHPCPP_EXPORT void* get_module()
         Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false)
     });
-    unix_socket.method<&UnixSocket::bind>("bind", {
+    unix_socket.method<&UnixSocket::bind_local>("bind", {
         Php::ByVal("path", Php::Type::String)
     });
     unix_socket.method<&UnixSocket::remote_path>("remotePath");
@@ -254,6 +302,35 @@ extern "C" PHPCPP_EXPORT void* get_module()
     });
     unix_socket.method<&UnixSocket::close>("close");
     asio.add(std::move(unix_socket));
+
+    //Class Asio\UdgSocket.
+    Php::Class<UdgSocket> udg_socket("Asio\\UdgSocket", Php::Final);
+    udg_socket.implements(datagram_socket);
+    udg_socket.implements(local_socket);
+    udg_socket.method<&UdgSocket::open_local>("open");
+    udg_socket.method<&UdgSocket::recv_from>("recvFrom", {
+        Php::ByVal("length", Php::Type::Numeric),
+        Php::ByVal("callback", Php::Type::Callable, false),
+        Php::ByVal("argument", Php::Type::Null, false)
+    });
+    udg_socket.method<&UdgSocket::send_to>("sendTo", {
+        Php::ByVal("data", Php::Type::String),
+        Php::ByVal("path", Php::Type::String),
+        Php::ByVal("callback", Php::Type::Callable, false),
+        Php::ByVal("argument", Php::Type::Null, false)
+    });
+    udg_socket.method<&UdgSocket::bind_local>("bind", {
+        Php::ByVal("path", Php::Type::String)
+    });
+    udg_socket.method<&UdgSocket::remote_path>("remotePath");
+    udg_socket.method<&UdgSocket::available>("available", {
+        Php::ByRef("ec", Php::Type::Null, false)
+    });
+    udg_socket.method<&UdgSocket::at_mark>("atMark", {
+        Php::ByRef("ec", Php::Type::Null, false)
+    });
+    udg_socket.method<&UdgSocket::close>("close");
+    asio.add(std::move(udg_socket));
 
     // Class Asio\TcpResolver.
     Php::Class<TcpResolver> tcp_resolver("Asio\\TcpResolver", Php::Final);

@@ -25,13 +25,16 @@ namespace Asio
         /**
          * Defer the timer.
          */
-        Future* wait();
+        Future* wait(const Php::Value& callback, const Php::Value& argument);
 
         /**
          * Handler for timer callback.
          * @param error : error code
          */
-        Php::Value handler(const boost::system::error_code& error);
+        CORO_RETVAL handler(
+            const boost::system::error_code& error,
+            const Php::Value& callback,
+            const Php::Value& argument);
 
     public:
         /**
@@ -53,7 +56,7 @@ namespace Asio
         /**
          * Initiate an asynchronous wait against the timer.
          */
-        Php::Value wait(Php::Parameters& params);
+        FUTURE_RETVAL wait(Php::Parameters& params);
 
         /**
          * Cancel timer.

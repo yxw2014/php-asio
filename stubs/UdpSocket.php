@@ -1,6 +1,7 @@
 <?php
+
 /**
- * php-asio/stubs/TcpSocket.php
+ * php-asio/stubs/UdpSocket.php
  *
  * This file is a stub of php-asio, which is implemented in extension asio.so.
  * For source code of asio.so, see src/ directory.
@@ -11,16 +12,16 @@
 namespace Asio;
 
 /**
- * Class TcpSocket
+ * Class UdpSocket
  *
- * Provides operations on TCP sockets.
+ * Provides operations on UDP sockets.
  *
  * @package Asio
  */
-final class TcpSocket implements StreamSocket, InetSocket
+class UdpSocket implements InetSocket, DatagramSocket
 {
     /**
-     * This class can only be instantiated using `Service::addTcpSocket()` and `TcpAcceptor::Accept()`.
+     * This class can only be instantiated using `Service::addUdpSocket()`.
      */
     private function __construct() {}
 
@@ -35,24 +36,21 @@ final class TcpSocket implements StreamSocket, InetSocket
     function bind(string $address, int $port) {}
 
     /**
-     * Connect to a remote endpoint.
+     * {@inheritdoc}
+     */
+    function recvFrom(int $length, callable $callback = null, $argument = null) {}
+
+    /**
+     * Send asynchronously to UNIX datagram socket.
      *
+     * @param string $data : Data to send to datagram socket.
      * @param string $address : Remote address
      * @param int $port : Remote port
      * @param callable $callback[optional]
      * @param mixed $argument
+     * @return Future
      */
-    function connect(string $address, int $port, callable $callback, $argument = null) {}
-
-    /**
-     * {@inheritdoc}
-     */
-    function read(int $length, bool $read_some = true, callable $callback = null, $argument = null) {}
-
-    /**
-     * {@inheritdoc}
-     */
-    function write(string $data, bool $write_some = false, callable $callback = null, $argument = null) {}
+    function sendTo(string $data, string $address, int $port, callable $callback, $argument = null) {}
 
     /**
      * {@inheritdoc}

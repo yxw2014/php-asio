@@ -23,16 +23,6 @@ namespace Asio
         boost::asio::io_service& io_service_;
 
         /**
-         * Extra argument to be passed to handler callback.
-         */
-        Php::Value argument_;
-
-        /**
-         * Handler callback.
-         */
-        Php::Value callback_;
-
-        /**
          * True when all async operations have been cancelled and this object is about to destroy.
          */
         bool cancelled_ = false;

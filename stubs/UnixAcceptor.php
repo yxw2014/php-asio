@@ -11,7 +11,9 @@
 namespace Asio;
 
 /**
- * Wrapper for Boost.Asio local stream_protocol acceptor.
+ * Class UnixAcceptor
+ *
+ * Used for accepting new UNIX domain socket connections.
  *
  * @package Asio
  */

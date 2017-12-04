@@ -8,19 +8,22 @@
 
 namespace Asio
 {
-    Future* Timer::wait()
+    Future* Timer::wait(const Php::Value& callback, const Php::Value& argument)
     {
         auto future = Future::add();
-        future->on_resolve<NOARG>(boost::bind(&Timer::handler, this, _1));
+        future->on_resolve<NOARG>(boost::bind(&Timer::handler, this, _1, callback, argument));
         timer_.async_wait(ASYNC_HANDLER_SINGLE_ARG);
         return future;
     }
 
-    Php::Value Timer::handler(const boost::system::error_code& error)
+    CORO_RETVAL Timer::handler(
+        const boost::system::error_code& error,
+        const Php::Value& callback,
+        const Php::Value& argument)
     {
-        if (callback_.isCallable())
-            Future::coroutine(callback_(this, error.value(), argument_));
-        return Php::Value();
+        if (callback.isCallable())
+            CORO_REGISTER(callback(this, error.value(), argument));
+        CORO_RETURN(Php::Value());
     }
 
     Timer::Timer(boost::asio::io_service& io_service) : Base(io_service), timer_(io_service)
@@ -43,14 +46,12 @@ namespace Asio
         return static_cast<int64_t>(ec.value());
     }
 
-    Php::Value Timer::wait(Php::Parameters& params)
+    FUTURE_RETVAL Timer::wait(Php::Parameters& params)
     {
         if (cancelled_)
             throw Php::Exception("Trying to wait for a cancelled timer.");
         auto param_count = params.size();
-        callback_ = param_count ? params[0] : Php::Value();
-        argument_ = param_count > 1 ? params[1] : Php::Value();
-        return wait();
+        FUTURE_RETURN wait(param_count ? params[0] : Php::Value(), param_count > 1 ? params[1] : Php::Value());
     }
 
     Php::Value Timer::cancel()

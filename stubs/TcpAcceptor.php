@@ -11,7 +11,9 @@
 namespace Asio;
 
 /**
- * Wrapper for Boost.Asio TCP acceptor.
+ * Class TcpAcceptor
+ *
+ * Used for accepting new TCP connections.
  *
  * @package Asio
  */

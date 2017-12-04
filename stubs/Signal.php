@@ -11,7 +11,9 @@
 namespace Asio;
 
 /**
- * Wrapper for Boost.Asio signal_set.
+ * Class Signal
+ *
+ * Provides signal handling functionality.
  *
  * @package Asio
  */

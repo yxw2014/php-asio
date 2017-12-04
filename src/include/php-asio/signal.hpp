@@ -28,12 +28,16 @@ namespace Asio
          * @param error : Error code
          * @param signal : Signal number
          */
-        Php::Value handler(const boost::system::error_code& error, int signal);
+        CORO_RETVAL handler(
+            const boost::system::error_code& error,
+            int signal,
+            const Php::Value& callback,
+            const Php::Value& argument);
 
         /**
          * The internal wait mathod.
          */
-        Future* wait();
+        Future* wait(const Php::Value& callback, const Php::Value& argument);
 
     public:
         /**
@@ -60,7 +64,7 @@ namespace Asio
         /**
          * Initiate an asynchronous wait against the signal set.
          */
-        Php::Value wait(Php::Parameters&);
+        FUTURE_RETVAL wait(Php::Parameters&);
 
         /**
          * Remove all signals from the signal set.

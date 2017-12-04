@@ -9,23 +9,30 @@
 namespace Asio
 {
     template <typename Protocol>
-    Php::Value Resolver<Protocol>::handler(const boost::system::error_code& error, iterator iter)
+    CORO_RETVAL Resolver<Protocol>::handler(
+        const boost::system::error_code& error,
+        iterator iter,
+        const Php::Value& callback,
+        const Php::Value& argument)
     {
         iterator end;
         std::vector<std::string> resolved;
         while (iter != end)
             resolved.push_back((*iter++).endpoint().address().to_string());
         Php::Value addr_list(resolved);
-        if (callback_.isCallable())
-            Future::coroutine(callback_(this, addr_list, error.value(), argument_));
-        return addr_list;
+        if (callback.isCallable())
+            CORO_REGISTER(callback(this, addr_list, error.value(), argument));
+        CORO_RETURN(addr_list);
     }
 
     template <typename Protocol>
-    Future* Resolver<Protocol>::resolve(const typename Protocol::resolver::query&& query)
+    Future* Resolver<Protocol>::resolve(
+        const typename Protocol::resolver::query&& query,
+        const Php::Value& callback,
+        const Php::Value& argument)
     {
         auto future = Future::add();
-        future->on_resolve<iterator>(boost::bind(&Resolver::handler, this, _1, _2));
+        future->on_resolve<iterator>(boost::bind(&Resolver::handler, this, _1, _2, callback, argument));
         resolver_.async_resolve(query, ASYNC_HANDLER_DOUBLE_ARG(iterator));
         return future;
     }
@@ -43,14 +50,13 @@ namespace Asio
     }
 
     template <typename Protocol>
-    Php::Value Resolver<Protocol>::resolve(Php::Parameters& params)
+    FUTURE_RETVAL Resolver<Protocol>::resolve(Php::Parameters& params)
     {
         if (cancelled_)
             throw Php::Exception("Trying to resolve on a cancelled resolver.");
         auto param_count = params.size();
-        callback_ = param_count > 2 ? params[2] : Php::Value();
-        argument_ = param_count > 3 ? params[3] : Php::Value();
-        return resolve({ params[0].stringValue(), param_count > 1 ? params[1].stringValue() : "" });
+        FUTURE_RETURN resolve({ params[0].stringValue(), param_count > 1 ? params[1].stringValue() : "" },
+            param_count > 2 ? params[2] : Php::Value(), param_count > 3 ? params[3] : Php::Value());
     }
 
     template <typename Protocol>

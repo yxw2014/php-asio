@@ -8,7 +8,7 @@
 
 #include "common.hpp"
 
-#define ASYNC_CALLBACK(type) std::function<Php::Value(const boost::system::error_code&, type)>
+#define ASYNC_CALLBACK(type) std::function<CORO_RETVAL(const boost::system::error_code&, type)>
 
 namespace Asio
 {
@@ -20,14 +20,15 @@ namespace Asio
     class Future : public Php::Base
     {
         /**
-         * Last error code emitted by yielded async operations of this thread.
-         */
-        static thread_local int64_t last_error_;
-
-        /**
          * Handler callback of the async operation.
          */
         void* callback_;
+
+#if ENABLE_COROUTINE
+        /**
+         * Last error code emitted by yielded async operations of this thread.
+         */
+        static thread_local int64_t last_error_;
 
         /**
          * Generator instance which yielded this Future.
@@ -43,6 +44,7 @@ namespace Asio
          * Whether this future is yielded by a Generator.
          */
         bool yield_ = false;
+#endif
 
         /**
          * PHP wrapper for this object.
@@ -92,6 +94,7 @@ namespace Asio
         template <typename T>
         void resolve(const boost::system::error_code& ec, T arg);
 
+#if ENABLE_COROUTINE
         /**
          * Attempt to start/resume a coroutine with a PHP Generator.
          */
@@ -104,6 +107,7 @@ namespace Asio
         {
             return last_error_;
         }
+#endif
 
     };
 }

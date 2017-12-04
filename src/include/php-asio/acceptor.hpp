@@ -29,15 +29,18 @@ namespace Asio
          * Async accept.
          * @return Future
          */
-        Future* accept();
+        Future* accept(const Php::Value& callback, const Php::Value& argument);
 
         /**
          * Accept handler.
          * @param error : Error code
          * @param socket : Socket of accepted connection
-         * @return Accepted socket
          */
-        Php::Value handler(const boost::system::error_code& error, Socket<Protocol>* const socket);
+        CORO_RETVAL handler(
+            const boost::system::error_code& error,
+            Socket<Protocol>* const socket,
+            const Php::Value& callback,
+            const Php::Value& argument);
 
     public:
         /**
@@ -76,7 +79,7 @@ namespace Asio
         /**
          * Asynchronously accept a new connection into a socket.
          */
-        Php::Value accept(Php::Parameters&);
+        FUTURE_RETVAL accept(Php::Parameters&);
 
         /**
          * Cancel async operations and stop acceptor.

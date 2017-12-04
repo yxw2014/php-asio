@@ -11,7 +11,10 @@
 namespace Asio;
 
 /**
- * Wrapper for Boost.Asio UDP resolver.
+ * Class UdpResolver
+ *
+ * Provides the ability to resolve a query to an array of endpoints.
+ * Remote service should use UDP as transport protocol.
  *
  * @package Asio
  */

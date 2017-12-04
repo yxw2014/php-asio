@@ -11,7 +11,9 @@
 namespace Asio;
 
 /**
- * Wrapper for Boost.Asio local stream_protocol socket.
+ * Class UnixSocket
+ *
+ * Provides operations on UNIX domain sockets (SOCK_STREAM).
  *
  * @package Asio
  */

@@ -11,7 +11,7 @@
 namespace Asio;
 
 /**
- * Wrapper for Boost.Asio deadline timer.
+ * Wrapper for Boost.Asio deadline_timer.
  *
  * @package Asio
  */

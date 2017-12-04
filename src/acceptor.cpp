@@ -9,21 +9,25 @@
 namespace Asio
 {
     template <typename Protocol>
-    Future* Acceptor<Protocol>::accept()
+    Future* Acceptor<Protocol>::accept(const Php::Value& callback, const Php::Value& argument)
     {
         auto socket = new Socket<Protocol>(io_service_);
         auto future = Future::add();
-        future->on_resolve<NOARG>(boost::bind(&Acceptor::handler, this, _1, socket));
+        future->on_resolve<NOARG>(boost::bind(&Acceptor::handler, this, _1, socket, callback, argument));
         acceptor_.async_accept(socket->getSocket(), ASYNC_HANDLER_SINGLE_ARG);
         return future;
     }
 
     template <typename Protocol>
-    Php::Value Acceptor<Protocol>::handler(const boost::system::error_code& error, Socket<Protocol>* const socket)
+    CORO_RETVAL Acceptor<Protocol>::handler(
+        const boost::system::error_code& error,
+        Socket<Protocol>* const socket,
+        const Php::Value& callback,
+        const Php::Value& argument)
     {
-        if (callback_.isCallable())
-            Future::coroutine(callback_(this, socket, error.value(), argument_));
-        return socket;
+        if (callback.isCallable())
+            CORO_REGISTER(callback(this, socket, error.value(), argument));
+        CORO_RETURN(socket);
     }
 
     template <>
@@ -83,14 +87,12 @@ namespace Asio
     }
 
     template <typename Protocol>
-    Php::Value Acceptor<Protocol>::accept(Php::Parameters& params)
+    FUTURE_RETVAL Acceptor<Protocol>::accept(Php::Parameters& params)
     {
         if (cancelled_)
             throw Php::Exception("Trying to accept connection on a stopped acceptor.");
         auto param_count = params.size();
-        callback_ = param_count ? params[0] : Php::Value();
-        argument_ = param_count > 1 ? params[1] : Php::Value();
-        return accept();
+        FUTURE_RETURN accept(param_count ? params[0] : Php::Value(), param_count > 1 ? params[1] : Php::Value());
     }
 
     template <typename Protocol>

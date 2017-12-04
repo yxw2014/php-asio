@@ -95,11 +95,27 @@ namespace Asio
         }
 
         /**
+         * Add a new UDP socket.
+         */
+        Php::Value add_udp_socket()
+        {
+            return new TcpSocket(io_service_);
+        }
+
+        /**
          * Add a new UNIX domain socket (SOCK_STREAM).
          */
         Php::Value add_unix_socket()
         {
             return new UnixSocket(io_service_);
+        }
+
+        /**
+         * Add a new UNIX domain socket (SOCK_DGRAM).
+         */
+        Php::Value add_udg_socket()
+        {
+            return new UdgSocket(io_service_);
         }
 
         /**
@@ -191,7 +207,7 @@ namespace Asio
             auto argument = params.size() == 1 ? Php::Value() : params[1];
             io_service_.post([callback, argument]()
             {
-                Future::coroutine(callback(argument));
+                CORO_REGISTER(callback(argument));
             });
         }
 
@@ -204,7 +220,7 @@ namespace Asio
             auto argument = params.size() == 1 ? Php::Value() : params[1];
             io_service_.dispatch([callback, argument]()
             {
-                Future::coroutine(callback(argument));
+                CORO_REGISTER(callback(argument));
             });
         }
 

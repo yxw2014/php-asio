@@ -25,7 +25,7 @@ $acceptor->accept(
         elseif ($socket instanceof Asio\UnixSocket)
             echo 'Remote ', $socket->remotePath(), ' Connected.', PHP_EOL;
         $server->accept($acceptor_cb);
-        yield $socket->write('Connected to server.'.PHP_EOL, false);
+        $socket->write('Connected to server.'.PHP_EOL, false);
         $socket->read(64, true,
             $read_cb = function (Asio\StreamSocket $socket, $data, $length, $ec) use (&$read_cb) {
                 if ($ec) {

@@ -11,7 +11,7 @@
 namespace Asio;
 
 /**
- * Interface Server
+ * Interface Acceptor
  *
  * @package Asio
  */

@@ -33,15 +33,21 @@ namespace Asio
          * Resolve handler.
          * @param error : Error code
          * @param iter : Endpoint iterator
-         * @return Array of resolved addresses in string
          */
-        Php::Value handler(const boost::system::error_code& error, iterator iter);
+        CORO_RETVAL handler(
+            const boost::system::error_code& error,
+            iterator iter,
+            const Php::Value& callback,
+            const Php::Value& argument);
 
         /**
          * The internal resolve method.
          * @return Future
          */
-        Future* resolve(const typename Protocol::resolver::query&& query);
+        Future* resolve(
+            const typename Protocol::resolver::query&& query,
+            const Php::Value& callback,
+            const Php::Value& argument);
 
     public:
         /**
@@ -58,7 +64,7 @@ namespace Asio
         /**
          * Initiate an asynchronous resolve against the resolver.
          */
-        Php::Value resolve(Php::Parameters&);
+        FUTURE_RETVAL resolve(Php::Parameters&);
 
         /**
          * Cancel resolve operation and destroy the resolver.

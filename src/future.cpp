@@ -19,12 +19,16 @@ namespace Asio
     void Future::resolve(const boost::system::error_code& ec, T arg)
     {
         auto callback = static_cast<ASYNC_CALLBACK(T)*>(callback_);
+#if ENABLE_COROUTINE
         send_ = (*callback)(ec, arg);
         if (yield_) {
             last_error_ = static_cast<int64_t>(ec.value());
             generator_.call("send", send_);
             coroutine(generator_);
         }
+#else
+        (*callback)(ec, arg);
+#endif
         delete callback;
         delete wrapper_;
     }
@@ -34,6 +38,7 @@ namespace Asio
         wrapper_ = new Php::Object("Asio\\Future", this);
     }
 
+#if ENABLE_COROUTINE
     void Future::coroutine(const Php::Value& generator)
     {
         if (generator.instanceOf("Generator") && generator.call("valid").boolValue()) {
@@ -47,6 +52,7 @@ namespace Asio
     }
 
     thread_local int64_t Future::last_error_ = 0;
+#endif
 
     // Initialization for Future.
     template void Future::on_resolve(const ASYNC_CALLBACK(int)&&);

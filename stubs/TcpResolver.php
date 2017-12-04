@@ -11,7 +11,10 @@
 namespace Asio;
 
 /**
- * Wrapper for Boost.Asio TCP resolver.
+ * Class TcpResolver
+ *
+ * Provides the ability to resolve a query to an array of endpoints.
+ * Remote service should use TCP as transport protocol.
  *
  * @package Asio
  */

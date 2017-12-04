@@ -8,17 +8,21 @@
 
 namespace Asio
 {
-    Php::Value Signal::handler(const boost::system::error_code& error, int signal)
+    CORO_RETVAL Signal::handler(
+        const boost::system::error_code& error,
+        int signal,
+        const Php::Value& callback,
+        const Php::Value& argument)
     {
-        if (callback_.isCallable())
-            Future::coroutine(callback_(this, signal, error.value(), argument_));
-        return signal;
+        if (callback.isCallable())
+            CORO_REGISTER(callback(this, signal, error.value(), argument));
+        CORO_RETURN(signal);
     }
 
-    Future* Signal::wait()
+    Future* Signal::wait(const Php::Value& callback, const Php::Value& argument)
     {
         auto future = Future::add();
-        future->on_resolve<int>(boost::bind(&Signal::handler, this, _1, _2));
+        future->on_resolve<int>(boost::bind(&Signal::handler, this, _1, _2, callback, argument));
         signal_.async_wait(ASYNC_HANDLER_DOUBLE_ARG(int));
         return future;
     }
@@ -60,14 +64,12 @@ namespace Asio
         return ec.value();
     }
 
-    Php::Value Signal::wait(Php::Parameters& params)
+    FUTURE_RETVAL Signal::wait(Php::Parameters& params)
     {
         if (cancelled_)
             throw Php::Exception("Trying to wait for a cancelled signal set.");
         auto param_count = params.size();
-        callback_ = param_count ? params[0] : Php::Value();
-        argument_ = param_count > 1 ? params[1] : Php::Value();
-        return wait();
+        FUTURE_RETURN wait(param_count ? params[0] : Php::Value(), param_count > 1 ? params[1] : Php::Value());
     }
 
     Php::Value Signal::clear()

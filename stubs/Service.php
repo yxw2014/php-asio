@@ -11,7 +11,8 @@
 namespace Asio;
 
 /**
- * Wrapper for Boost.Asio IO service.
+ * Class Service
+ *
  * Provide access to instantiation of IO objects.
  *
  * @package Asio
@@ -61,11 +62,25 @@ class Service
     function addTcpSocket() {}
 
     /**
+     * Add a new UDP socket.
+     *
+     * @return UdpSocket
+     */
+    function addUdpSocket() {}
+
+    /**
      * Add a new UNIX domain socket (SOCK_STREAM).
      *
      * @return UnixSocket
      */
     function addUnixSocket() {}
+
+    /**
+     * Add a new UNIX domain socket (SOCK_DGRAM).
+     *
+     * @return UdgSocket
+     */
+    function addUdgSocket() {}
 
     /**
      * Add new signal set.
