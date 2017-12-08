@@ -154,7 +154,10 @@ namespace Asio
         /**
          * Get reference of socket.
          */
-        typename Protocol::socket& getSocket();
+        typename Protocol::socket& get_socket()
+        {
+            return socket_;
+        }
 
         /**
          * Open INET socket (AF_INET or AF_INET6).

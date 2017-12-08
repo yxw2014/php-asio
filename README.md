@@ -30,7 +30,7 @@ Bug reports and pull requests are welcome.
 
 ## 3. Documentation
 
-Signatures of classes and functions of php-asio can be found within [stubs/](stubs/) directory, with PHPDoc.
+Signatures of classes and functions can be found within [stubs/](stubs/) directory, with PHPDoc.
 
 There are also some examples in the [examples/](examples/) directory.
 

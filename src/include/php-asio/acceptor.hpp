@@ -84,11 +84,10 @@ namespace Asio
         /**
          * Cancel async operations and stop acceptor.
          */
-        Php::Value stop();
+        Php::Value close();
 
     };
 
-    // Type alias for Acceptor.
     using TcpAcceptor = Acceptor<tcp>;
     using UnixAcceptor = Acceptor<unix>;
 }

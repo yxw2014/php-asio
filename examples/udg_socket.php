@@ -10,7 +10,7 @@ $service->post(function () use ($service) {
     $socket = $service->addUdgSocket();
     $socket->open();
     $socket->bind('/tmp/test.sock');
-    $socket->recvFrom(100, $callback =
+    $socket->recvFrom(100,
         function (Asio\UdgSocket $socket, string $data, string $remote_path, int $length, int $ec) {
             if ($ec) {
                 echo 'Receive failed. ', posix_strerror($ec), PHP_EOL;
@@ -19,7 +19,6 @@ $service->post(function () use ($service) {
             }
             echo "Remote $remote_path sent \"$data\".", PHP_EOL;
             yield $socket->sendTo('bye', $remote_path);
-            echo Asio\Service::lastError();
             $socket->close();
         });
     $socket = $service->addUdgSocket();

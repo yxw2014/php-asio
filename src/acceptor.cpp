@@ -14,7 +14,7 @@ namespace Asio
         auto socket = new Socket<Protocol>(io_service_);
         auto future = Future::add();
         future->on_resolve<NOARG>(boost::bind(&Acceptor::handler, this, _1, socket, callback, argument));
-        acceptor_.async_accept(socket->getSocket(), ASYNC_HANDLER_SINGLE_ARG);
+        acceptor_.async_accept(socket->get_socket(), ASYNC_HANDLER_SINGLE_ARG);
         return future;
     }
 
@@ -90,16 +90,16 @@ namespace Asio
     FUTURE_RETVAL Acceptor<Protocol>::accept(Php::Parameters& params)
     {
         if (cancelled_)
-            throw Php::Exception("Trying to accept connection on a stopped acceptor.");
+            throw Php::Exception("Trying to accept connection on a closed acceptor.");
         auto param_count = params.size();
         FUTURE_RETURN accept(param_count ? params[0] : Php::Value(), param_count > 1 ? params[1] : Php::Value());
     }
 
     template <typename Protocol>
-    Php::Value Acceptor<Protocol>::stop()
+    Php::Value Acceptor<Protocol>::close()
     {
         if (!cancelled_)
-            throw Php::Exception("Trying to stop a stopped acceptor.");
+            throw Php::Exception("Trying to close a closed acceptor.");
         boost::system::error_code ec;
         acceptor_.cancel(ec);
         if (!ec) {
@@ -112,11 +112,9 @@ namespace Asio
         return ec.value();
     }
 
-    // Instantiation for TCP acceptor.
     template class Acceptor<tcp>;
     template Php::Value TcpAcceptor::open_inet(Php::Parameters&);
 
-    // Instantiation for UNIX domain socket acceptor.
     template class Acceptor<unix>;
     template Php::Value UnixAcceptor::open_local();
 }

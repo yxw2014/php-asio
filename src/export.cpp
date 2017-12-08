@@ -83,7 +83,7 @@ extern "C" PHPCPP_EXPORT void* get_module()
         Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false)
     });
-    acceptor.method("stop");
+    acceptor.method("close");
     asio.add(std::move(acceptor));
 
     // Interface Asii\Resolver.
@@ -174,7 +174,7 @@ extern "C" PHPCPP_EXPORT void* get_module()
         Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false)
     });
-    tcp_acceptor.method<&TcpAcceptor::stop>("stop");
+    tcp_acceptor.method<&TcpAcceptor::close>("close");
     asio.add(std::move(tcp_acceptor));
 
     // Class Asio\UnixAcceptor.
@@ -191,7 +191,7 @@ extern "C" PHPCPP_EXPORT void* get_module()
         Php::ByVal("callback", Php::Type::Callable, false),
         Php::ByVal("argument", Php::Type::Null, false)
     });
-    unix_acceptor.method<&UnixAcceptor::stop>("stop");
+    unix_acceptor.method<&UnixAcceptor::close>("close");
     asio.add(std::move(unix_acceptor));
 
     // Class Asio\TcpSocket.

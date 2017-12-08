@@ -68,7 +68,6 @@ namespace Asio
         cancelled_ = true;
     }
 
-    // Instantiation for Resolver.
     template class Resolver<tcp>;
     template class Resolver<udp>;
 }

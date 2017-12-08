@@ -9,6 +9,11 @@
 
 namespace Asio
 {
+    Future::Future()
+    {
+        wrapper_ = new Php::Object("Asio\\Future", this);
+    }
+
     template <typename T>
     void Future::on_resolve(const ASYNC_CALLBACK(T)&& callback)
     {
@@ -31,11 +36,6 @@ namespace Asio
 #endif
         delete callback;
         delete wrapper_;
-    }
-
-    Future::Future()
-    {
-        wrapper_ = new Php::Object("Asio\\Future", this);
     }
 
 #if ENABLE_COROUTINE

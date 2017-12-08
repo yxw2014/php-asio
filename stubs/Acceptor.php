@@ -40,5 +40,5 @@ interface Acceptor
      *
      * @return int : Error code
      */
-    function stop();
+    function close();
 }

@@ -106,6 +106,31 @@ namespace Asio
 #endif
     }
 
+    template <> template <>
+    Future* TcpSocket::connect(
+        const std::string& address,
+        unsigned short port_num,
+        const Php::Value& callback,
+        const Php::Value& argument)
+    {
+        auto future = Future::add();
+        future->on_resolve<NOARG>(boost::bind(&Socket::connect_handler, this, _1, callback, argument));
+        socket_.async_connect({ boost::asio::ip::address::from_string(address), port_num }, ASYNC_HANDLER_SINGLE_ARG);
+        return future;
+    }
+
+    template <> template <>
+    Future* UnixSocket::connect(
+        const std::string& socket_path,
+        const Php::Value& callback,
+        const Php::Value& argument)
+    {
+        auto future = Future::add();
+        future->on_resolve<NOARG>(boost::bind(&Socket::connect_handler, this, _1, callback, argument));
+        socket_.async_connect({ socket_path }, ASYNC_HANDLER_SINGLE_ARG);
+        return future;
+    }
+
     template <typename Protocol> template <typename, typename>
     Future* Socket<Protocol>::read(int64_t length, bool read_some, const Php::Value& callback, const Php::Value& argument)
     {
@@ -201,12 +226,6 @@ namespace Asio
         wrapper_ = new Php::Object("Asio\\UdgSocket", this);
     }
 
-    template <typename Protocol>
-    typename Protocol::socket& Socket<Protocol>::getSocket()
-    {
-        return socket_;
-    }
-
     template <typename Protocol> template <typename P, std::string(P::endpoint::*port)()>
     Php::Value Socket<Protocol>::open_inet(Php::Parameters& params)
     {
@@ -242,31 +261,6 @@ namespace Asio
         boost::system::error_code ec;
         socket_.bind({ socket_path }, ec);
         return ec.value();
-    }
-
-    template <> template <>
-    Future* TcpSocket::connect(
-        const std::string& address,
-        unsigned short port_num,
-        const Php::Value& callback,
-        const Php::Value& argument)
-    {
-        auto future = Future::add();
-        future->on_resolve<NOARG>(boost::bind(&Socket::connect_handler, this, _1, callback, argument));
-        socket_.async_connect({ boost::asio::ip::address::from_string(address), port_num }, ASYNC_HANDLER_SINGLE_ARG);
-        return future;
-    }
-
-    template <> template <>
-    Future* UnixSocket::connect(
-        const std::string& socket_path,
-        const Php::Value& callback,
-        const Php::Value& argument)
-    {
-        auto future = Future::add();
-        future->on_resolve<NOARG>(boost::bind(&Socket::connect_handler, this, _1, callback, argument));
-        socket_.async_connect({ socket_path }, ASYNC_HANDLER_SINGLE_ARG);
-        return future;
     }
 
     template <>

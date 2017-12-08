@@ -11,7 +11,8 @@ $acceptor->open(true);
 // Unlike that of PHP (`stream_socket_server()`), IPv6 addresses should not be put between a pair of brackets.
 if ($ec = $acceptor->bind('::', 8081)) {
     echo 'Bind failed. ', posix_strerror($ec), PHP_EOL;
-    return;
+    $acceptor->close();
+    exit;
 }
 $acceptor->listen(20);
 $acceptor->accept(
@@ -49,7 +50,8 @@ $acceptor = $service->addUnixAcceptor();
 $acceptor->open();
 if ($ec = $acceptor->bind('/tmp/test.sock')) {
     echo 'Bind failed. ', posix_strerror($ec), PHP_EOL;
-    return;
+    $acceptor->close();
+    exit;
 }
 $acceptor->listen(20);
 $acceptor->accept($acceptor_cb);

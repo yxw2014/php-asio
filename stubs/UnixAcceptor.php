@@ -52,5 +52,5 @@ final class UnixAcceptor implements Acceptor
     /**
      * {@inheritdoc}
      */
-    function stop() {}
+    function close() {}
 }
