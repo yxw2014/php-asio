@@ -32,12 +32,12 @@ namespace Asio
         if (callback.isCallable())
             CORO_REGISTER(callback(this, str_buffer, bytes_transferred, error.value(), argument));
         delete buffer;
-#if ENABLE_COROUTINE
+#ifdef ENABLE_COROUTINE
         return std::map<std::string, Php::Value> {
             std::make_pair("data", str_buffer),
             std::make_pair("length", bytes_transferred)
         };
-#endif
+#endif // ENABLE_COROUTINE
     }
 
     template <typename Protocol>
@@ -71,14 +71,14 @@ namespace Asio
             CORO_REGISTER(callback(this, str_buffer, address, port, bytes_transferred, error.value(), argument));
         delete buffer;
         delete endpoint;
-#if ENABLE_COROUTINE
+#ifdef ENABLE_COROUTINE
         return std::map<std::string, Php::Value> {
             std::make_pair("data", str_buffer),
             std::make_pair("length", bytes_transferred),
             std::make_pair("address", address),
             std::make_pair("port", port)
         };
-#endif
+#endif // ENABLE_COROUTINE
     }
 
     template <>
@@ -97,13 +97,13 @@ namespace Asio
             CORO_REGISTER(callback(this, str_buffer, path, bytes_transferred, error.value(), argument));
         delete buffer;
         delete endpoint;
-#if ENABLE_COROUTINE
+#ifdef ENABLE_COROUTINE
         return std::map<std::string, Php::Value> {
             std::make_pair("data", str_buffer),
             std::make_pair("length", bytes_transferred),
             std::make_pair("path", path),
         };
-#endif
+#endif // ENABLE_COROUTINE
     }
 
     template <> template <>
@@ -114,8 +114,9 @@ namespace Asio
         const Php::Value& argument)
     {
         auto future = Future::add();
-        future->on_resolve<NOARG>(boost::bind(&Socket::connect_handler, this, _1, callback, argument));
-        socket_.async_connect({ boost::asio::ip::address::from_string(address), port_num }, ASYNC_HANDLER_SINGLE_ARG);
+        future->on_resolve<NOARG>(boost::bind(&Socket::connect_handler, this, _1, STRAND_UNWRAP, argument));
+        socket_.async_connect({ boost::asio::ip::address::from_string(address), port_num },
+            STRAND_RESOLVE(ASYNC_HANDLER_SINGLE_ARG));
         return future;
     }
 
@@ -126,8 +127,8 @@ namespace Asio
         const Php::Value& argument)
     {
         auto future = Future::add();
-        future->on_resolve<NOARG>(boost::bind(&Socket::connect_handler, this, _1, callback, argument));
-        socket_.async_connect({ socket_path }, ASYNC_HANDLER_SINGLE_ARG);
+        future->on_resolve<NOARG>(boost::bind(&Socket::connect_handler, this, _1, STRAND_UNWRAP, argument));
+        socket_.async_connect({ socket_path }, STRAND_RESOLVE(ASYNC_HANDLER_SINGLE_ARG));
         return future;
     }
 
@@ -141,11 +142,11 @@ namespace Asio
         auto buffer = boost::asio::buffer(*buffer_container, size);
         auto future = Future::add();
         future->on_resolve<size_t>(boost::bind(
-            &Socket::read_handler, this, _1, _2, buffer_container, callback, argument));
+            &Socket::read_handler, this, _1, _2, buffer_container, STRAND_UNWRAP, argument));
         if (read_some)
-            socket_.async_read_some(buffer, ASYNC_HANDLER_DOUBLE_ARG(size_t));
+            socket_.async_read_some(buffer, STRAND_RESOLVE(ASYNC_HANDLER_DOUBLE_ARG(size_t)));
         else
-            async_read(socket_, buffer, ASYNC_HANDLER_DOUBLE_ARG(size_t));
+            async_read(socket_, buffer, STRAND_RESOLVE(ASYNC_HANDLER_DOUBLE_ARG(size_t)));
         return future;
     }
 
@@ -161,11 +162,13 @@ namespace Asio
         // Note that `data` gets out of scope when handler callback is called.
         auto buffer = new std::string(data);
         auto future = Future::add();
-        future->on_resolve<size_t>(boost::bind(&Socket::write_handler, this, _1, _2, buffer, callback, argument));
+        future->on_resolve<size_t>(boost::bind(&Socket::write_handler, this, _1, _2, buffer, STRAND_UNWRAP, argument));
         if (write_some)
-            socket_.async_write_some(boost::asio::buffer(*buffer), ASYNC_HANDLER_DOUBLE_ARG(size_t));
+            socket_.async_write_some(boost::asio::buffer(*buffer),
+                STRAND_RESOLVE(ASYNC_HANDLER_DOUBLE_ARG(size_t)));
         else
-            async_write(socket_, boost::asio::buffer(*buffer), ASYNC_HANDLER_DOUBLE_ARG(size_t));
+            async_write(socket_, boost::asio::buffer(*buffer),
+                STRAND_RESOLVE(ASYNC_HANDLER_DOUBLE_ARG(size_t)));
         return future;
     }
 
@@ -180,8 +183,8 @@ namespace Asio
         auto endpoint = new typename P::endpoint;
         auto future = Future::add();
         future->on_resolve<size_t>(boost::bind(
-            &Socket::recv_handler, this, _1, _2, buffer_container, endpoint, callback, argument));
-        socket_.async_receive_from(buffer, *endpoint, ASYNC_HANDLER_DOUBLE_ARG(size_t));
+            &Socket::recv_handler, this, _1, _2, buffer_container, endpoint, STRAND_UNWRAP, argument));
+        socket_.async_receive_from(buffer, *endpoint, STRAND_RESOLVE(ASYNC_HANDLER_DOUBLE_ARG(size_t)));
         return future;
     }
 
@@ -197,8 +200,9 @@ namespace Asio
         auto buffer = new std::string(data);
         auto future = Future::add();
         future->on_resolve<size_t>(boost::bind(
-            &Socket::write_handler, this, _1, _2, buffer, callback, argument));
-        socket_.async_send_to(boost::asio::buffer(*buffer), endpoint, ASYNC_HANDLER_DOUBLE_ARG(size_t));
+            &Socket::write_handler, this, _1, _2, buffer, STRAND_UNWRAP, argument));
+        socket_.async_send_to(boost::asio::buffer(*buffer), endpoint,
+            STRAND_RESOLVE(ASYNC_HANDLER_DOUBLE_ARG(size_t)));
         return future;
     }
 

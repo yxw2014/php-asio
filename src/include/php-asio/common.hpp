@@ -20,8 +20,8 @@
     boost::bind(&Future::resolve<type>, future, boost::asio::placeholders::error, _2))
 
 // If you don't need coroutines, you can turn it off for better performance.
-#define ENABLE_COROUTINE true
-#if ENABLE_COROUTINE
+#define ENABLE_COROUTINE
+#ifdef ENABLE_COROUTINE
 #define CORO_RETVAL Php::Value
 #define CORO_RETURN(value) return value
 #define CORO_REGISTER(value) Future::coroutine(value)
@@ -31,8 +31,18 @@
 #define CORO_RETURN(value)
 #define CORO_REGISTER(value) value
 #define FUTURE_RETURN
-#endif
+#endif // ENABLE_COROUTINE
 #define FUTURE_RETVAL CORO_RETVAL
+
+// If you don't need multi-threading support for I/O objects, you can disable Strand for better performance.
+#define ENABLE_STRAND
+#ifdef ENABLE_STRAND
+#define STRAND_UNWRAP future->strand(callback)
+#define STRAND_RESOLVE(arg) future->get_strand() ? future->get_strand()->wrap(arg) : arg
+#else
+#define STRAND_UNWRAP callback
+#define STRAND_RESOLVE(arg) arg
+#endif // ENABLE_STRAND
 
 using boost::asio::ip::tcp;
 using boost::asio::ip::udp;

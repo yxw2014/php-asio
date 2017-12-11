@@ -13,8 +13,8 @@ namespace Asio
     {
         auto socket = new Socket<Protocol>(io_service_);
         auto future = Future::add();
-        future->on_resolve<NOARG>(boost::bind(&Acceptor::handler, this, _1, socket, callback, argument));
-        acceptor_.async_accept(socket->get_socket(), ASYNC_HANDLER_SINGLE_ARG);
+        future->on_resolve<NOARG>(boost::bind(&Acceptor::handler, this, _1, socket, STRAND_UNWRAP, argument));
+        acceptor_.async_accept(socket->get_socket(), STRAND_RESOLVE(ASYNC_HANDLER_SINGLE_ARG));
         return future;
     }
 

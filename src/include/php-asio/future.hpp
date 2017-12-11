@@ -7,6 +7,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "wrapped_handler.hpp"
 
 #define ASYNC_CALLBACK(type) std::function<CORO_RETVAL(const boost::system::error_code&, type)>
 
@@ -24,7 +25,7 @@ namespace Asio
          */
         void* callback_;
 
-#if ENABLE_COROUTINE
+#ifdef ENABLE_COROUTINE
         /**
          * Last error code emitted by yielded async operations of this thread.
          */
@@ -44,7 +45,14 @@ namespace Asio
          * Whether this future is yielded by a Generator.
          */
         bool yield_ = false;
-#endif
+#endif // ENABLE_COROUTINE
+
+#ifdef ENABLE_STRAND
+        /**
+         * Pointer to Strand which wrapped this Future.
+         */
+        boost::asio::strand* strand_ = nullptr;
+#endif // ENABLE_STRAND
 
         /**
          * PHP wrapper for this object.
@@ -94,7 +102,19 @@ namespace Asio
         template <typename T>
         void resolve(const boost::system::error_code& ec, T arg);
 
-#if ENABLE_COROUTINE
+#ifdef ENABLE_STRAND
+        Php::Value strand(const Php::Value& callback);
+
+        /**
+         * Get the pointer to the strand which wrapped this Future.
+         */
+        boost::asio::strand* get_strand() const
+        {
+            return strand_;
+        }
+#endif // ENABLE_STRAND
+
+#ifdef ENABLE_COROUTINE
         /**
          * Attempt to start/resume a coroutine with a PHP Generator.
          */
@@ -107,7 +127,7 @@ namespace Asio
         {
             return last_error_;
         }
-#endif
+#endif // ENABLE_COROUTINE
 
     };
 }

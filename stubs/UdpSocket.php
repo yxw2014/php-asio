@@ -18,7 +18,7 @@ namespace Asio;
  *
  * @package Asio
  */
-class UdpSocket implements InetSocket, DatagramSocket
+final class UdpSocket implements InetSocket, DatagramSocket
 {
     /**
      * This class can only be instantiated using `Service::addUdpSocket()`.

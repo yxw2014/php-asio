@@ -7,6 +7,7 @@
 #pragma once
 
 #include "common.hpp"
+#include "strand.hpp"
 #include "timer.hpp"
 #include "acceptor.hpp"
 #include "resolver.hpp"
@@ -125,6 +126,13 @@ namespace Asio
         {
             return new Signal(io_service_);
         }
+
+#ifdef ENABLE_STRAND
+        Php::Value add_strand()
+        {
+            return new Strand(io_service_);
+        }
+#endif // ENABLE_STRAND
 
         /**
          * Run the event loop until stopped or no more work.

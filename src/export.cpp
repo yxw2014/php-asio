@@ -109,6 +109,9 @@ extern "C" PHPCPP_EXPORT void* get_module()
     service.method<&Service::add_unix_socket>("addUnixSocket");
     service.method<&Service::add_udg_socket>("addUdgSocket");
     service.method<&Service::add_signal>("addSignal");
+#ifdef ENABLE_STRAND
+    service.method<&Service::add_strand>("addStrand");
+#endif // ENABLE_STRAND
     service.method<&Service::run>("run", {
         Php::ByRef("ec", Php::Type::Null, false)
     });
@@ -135,14 +138,36 @@ extern "C" PHPCPP_EXPORT void* get_module()
     service.method<&Service::notify_fork>("notifyFork", {
         Php::ByVal("is_parent", Php::Type::Bool, false)
     });
-#if ENABLE_COROUTINE
+#ifdef ENABLE_COROUTINE
     service.method<&Future::get_last_error>("lastError");
-#endif
+#endif // ENABLE_COROUTINE
     asio.add(std::move(service));
 
     // Class Asio\Future.
     Php::Class<Future> future("Asio\\Future", Php::Final);
     asio.add(std::move(future));
+
+#ifdef ENABLE_STRAND
+    // Class Asio\Strand.
+    Php::Class<Strand> strand("Asio\\Strand", Php::Final);
+    strand.method<&Strand::dispatch>("dispatch", {
+        Php::ByVal("callback", Php::Type::Callable),
+        Php::ByVal("argument", Php::Type::Null, false)
+    });
+    strand.method<&Strand::post>("post", {
+        Php::ByVal("callback", Php::Type::Callable),
+        Php::ByVal("argument", Php::Type::Null, false)
+    });
+    strand.method<&Strand::running_in_this_thread>("runningInThisThread");
+    strand.method<&Strand::wrap>("wrap", {
+        Php::ByVal("callback", Php::Type::Callable, false)
+    });
+    asio.add(std::move(strand));
+
+    // Class Asio\WrappedHandler.
+    Php::Class<Strand> wrapped_handler("Asio\\WrappedHandler", Php::Final);
+    asio.add(std::move(wrapped_handler));
+#endif // ENABLE_STRAND
 
     // Class Asio\Timer.
     Php::Class<Timer> timer("Asio\\Timer", Php::Final);

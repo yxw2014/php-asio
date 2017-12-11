@@ -32,8 +32,8 @@ namespace Asio
         const Php::Value& argument)
     {
         auto future = Future::add();
-        future->on_resolve<iterator>(boost::bind(&Resolver::handler, this, _1, _2, callback, argument));
-        resolver_.async_resolve(query, ASYNC_HANDLER_DOUBLE_ARG(iterator));
+        future->on_resolve<iterator>(boost::bind(&Resolver::handler, this, _1, _2, STRAND_UNWRAP, argument));
+        resolver_.async_resolve(query, STRAND_RESOLVE(ASYNC_HANDLER_DOUBLE_ARG(iterator)));
         return future;
     }
 

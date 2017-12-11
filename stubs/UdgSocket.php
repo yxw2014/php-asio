@@ -17,7 +17,7 @@ namespace Asio;
  *
  * @package Asio
  */
-class UdgSocket implements DatagramSocket, LocalSocket
+final class UdgSocket implements DatagramSocket, LocalSocket
 {
     /**
      * This class can only be instantiated using `Service::addUdgSocket()`.

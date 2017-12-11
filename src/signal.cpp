@@ -22,8 +22,8 @@ namespace Asio
     Future* Signal::wait(const Php::Value& callback, const Php::Value& argument)
     {
         auto future = Future::add();
-        future->on_resolve<int>(boost::bind(&Signal::handler, this, _1, _2, callback, argument));
-        signal_.async_wait(ASYNC_HANDLER_DOUBLE_ARG(int));
+        future->on_resolve<int>(boost::bind(&Signal::handler, this, _1, _2, STRAND_UNWRAP, argument));
+        signal_.async_wait(STRAND_RESOLVE(ASYNC_HANDLER_DOUBLE_ARG(int)));
         return future;
     }
 

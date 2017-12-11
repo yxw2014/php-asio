@@ -5,7 +5,6 @@
  */
 
 #include "future.hpp"
-#include "service.hpp"
 
 namespace Asio
 {
@@ -24,21 +23,33 @@ namespace Asio
     void Future::resolve(const boost::system::error_code& ec, T arg)
     {
         auto callback = static_cast<ASYNC_CALLBACK(T)*>(callback_);
-#if ENABLE_COROUTINE
+#ifdef ENABLE_COROUTINE
         send_ = (*callback)(ec, arg);
         if (yield_) {
             last_error_ = static_cast<int64_t>(ec.value());
             generator_.call("send", send_);
             coroutine(generator_);
         }
-#else
+#else // ENABLE_COROUTINE
         (*callback)(ec, arg);
 #endif
         delete callback;
         delete wrapper_;
     }
 
-#if ENABLE_COROUTINE
+#ifdef ENABLE_STRAND
+    Php::Value Future::strand(const Php::Value& callback)
+    {
+        if (callback.instanceOf("Asio\\WrappedHandler")) {
+            auto wrapped_hander = static_cast<WrappedHandler*>(callback.implementation());
+            strand_ = &wrapped_hander->strand_;
+            return wrapped_hander->callback_;
+        }
+        return callback;
+    }
+#endif // ENABLE_STRAND
+
+#ifdef ENABLE_COROUTINE
     void Future::coroutine(const Php::Value& generator)
     {
         if (generator.instanceOf("Generator") && generator.call("valid").boolValue()) {
@@ -52,15 +63,15 @@ namespace Asio
     }
 
     thread_local int64_t Future::last_error_ = 0;
-#endif
+#endif // ENABLE_COROUTINE
 
-    // Initialization for Future.
     template void Future::on_resolve(const ASYNC_CALLBACK(int)&&);
-    template void Future::resolve(const boost::system::error_code&, int);
     template void Future::on_resolve(const ASYNC_CALLBACK(size_t)&&);
-    template void Future::resolve(const boost::system::error_code&, size_t);
     template void Future::on_resolve(const ASYNC_CALLBACK(tcp::resolver::iterator)&&);
-    template void Future::resolve(const boost::system::error_code&, tcp::resolver::iterator);
     template void Future::on_resolve(const ASYNC_CALLBACK(udp::resolver::iterator)&&);
+    template void Future::resolve(const boost::system::error_code&, int);
+    template void Future::resolve(const boost::system::error_code&, size_t);
+    template void Future::resolve(const boost::system::error_code&, tcp::resolver::iterator);
     template void Future::resolve(const boost::system::error_code&, udp::resolver::iterator);
+
 }

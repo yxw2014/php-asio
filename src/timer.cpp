@@ -11,8 +11,8 @@ namespace Asio
     Future* Timer::wait(const Php::Value& callback, const Php::Value& argument)
     {
         auto future = Future::add();
-        future->on_resolve<NOARG>(boost::bind(&Timer::handler, this, _1, callback, argument));
-        timer_.async_wait(ASYNC_HANDLER_SINGLE_ARG);
+        future->on_resolve<NOARG>(boost::bind(&Timer::handler, this, _1, STRAND_UNWRAP, argument));
+        timer_.async_wait(STRAND_RESOLVE(ASYNC_HANDLER_SINGLE_ARG));
         return future;
     }
 

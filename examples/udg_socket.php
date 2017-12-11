@@ -23,7 +23,7 @@ $service->post(function () use ($service) {
         });
     $socket = $service->addUdgSocket();
     $socket->open();
-    //Client socket must explicitly bind to a local endpoint so that remote can respond.
+    // Client socket must explicitly bind to a local endpoint so that remote can respond.
     $socket->bind('/tmp/test2.sock');
     yield $socket->sendTo('hello world', '/tmp/test.sock');
     $response = yield $socket->recvFrom(100);

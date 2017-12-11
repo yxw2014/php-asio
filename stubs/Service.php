@@ -90,6 +90,13 @@ class Service
     function addSignal() {}
 
     /**
+     * Add new strand.
+     *
+     * @return Strand
+     */
+    function addStrand() {}
+
+    /**
      * Run the event loop until stopped or no more work.
      *
      * @param int $ec[optional] : Error code
@@ -145,7 +152,7 @@ class Service
      * @param bool $is_parent[optional] : Empty for `fork_prepare`
      * @return int : Error code
      */
-    function notify_fork(bool $is_parent) {}
+    function notifyFork(bool $is_parent) {}
 
     /**
      * Stop the event processing loop.
