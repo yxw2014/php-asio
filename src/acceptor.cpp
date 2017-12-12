@@ -98,7 +98,7 @@ namespace Asio
     template <typename Protocol>
     Php::Value Acceptor<Protocol>::close()
     {
-        if (!cancelled_)
+        if (cancelled_)
             throw Php::Exception("Trying to close a closed acceptor.");
         boost::system::error_code ec;
         acceptor_.cancel(ec);
