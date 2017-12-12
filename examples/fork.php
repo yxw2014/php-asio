@@ -37,14 +37,12 @@ function fork_worker(Asio\Signal $signal)
 
 function handle_sigchld(Asio\Signal $signal)
 {
-    while ($pid = pcntl_wait($status, WNOHANG)) {
-        if ($pid < 1)
-            continue;
-        echo 'Worker ', $pid, ' exited with status ', $status, PHP_EOL;
-        // Fork a new worker if previous one exited.
-        fork_worker($signal);
-        return;
-    };
+    $pid = pcntl_wait($status, WUNTRACED);
+    if ($pid < 1)
+        die('An error occurred during wait().');
+    echo 'Worker ', $pid, ' exited with status ', $status, PHP_EOL;
+    // Fork a new worker if previous one exited.
+    fork_worker($signal);
 }
 
 $service->post(function () use ($service) {
