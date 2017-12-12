@@ -82,7 +82,7 @@ namespace Asio
     Php::Value Acceptor<Protocol>::listen(Php::Parameters& params)
     {
         boost::system::error_code ec;
-        acceptor_.listen(params.size() ? static_cast<int>(params[1].numericValue()) : Protocol::socket::max_connections, ec);
+        acceptor_.listen(params.size() ? static_cast<int>(params[0].numericValue()) : Protocol::socket::max_connections, ec);
         return ec.value();
     }
 
